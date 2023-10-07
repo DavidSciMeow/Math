@@ -19,6 +19,7 @@
     <RepositoryUrl>https://github.com/DavidSciMeow/Math/tree/main/Meow.Math.Fraction</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Math, Electronicute, Fraction</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
