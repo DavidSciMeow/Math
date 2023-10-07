@@ -56,4 +56,3 @@ using System.Numerics;
 //DateTime end = DateTime.Now;
 //Console.WriteLine("----------");
 //Console.WriteLine($"{(end - start).TotalMilliseconds} ms / {usedMemory2 - usedMemory1} MB");
-

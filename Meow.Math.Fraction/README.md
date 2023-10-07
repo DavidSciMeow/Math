@@ -39,12 +39,12 @@ a /= 3;
 1. `[operator]` `~ {var}` , this operator try turning the fraction into a complex fraction.
 
 ```csharp
-Fraction a = 220;
-a /= 70;
-Console.WriteLine(a >> 20); // (3, 14285714285714285714)
-Console.WriteLine(a >> 50); // (3, 14285714285714285714285714285714285714285714285714)
-Console.WriteLine(~a); // (3, 1 / 7)
-Console.WriteLine(!a); // 22 / 7
+Fraction a = 52163;
+a /= 16604;
+Console.WriteLine(a >> 20); // (3, 14159238737653577451)
+Console.WriteLine(a >> 50); // (3, 14159238737653577451216574319441098530474584437484)
+Console.WriteLine(~a); // (3, 2351 / 16604)
+Console.WriteLine(!a); // 52163 / 16604
 ```
 
 ## Tricks

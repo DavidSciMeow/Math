@@ -4,10 +4,32 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <NeutralLanguage>zh</NeutralLanguage>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <PackageId>Meow.Math.Fraction</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>DavidSciMeow</Authors>
+    <Company>Electronicute</Company>
+    <Product>Math.Fraction</Product>
+    <Description>ensure a decimal number is not truncate by IEEE standard.</Description>
+    <PackageProjectUrl>https://github.com/DavidSciMeow/Math/tree/main/Meow.Math.Fraction</PackageProjectUrl>
+    <Copyright>@2023 Electronicute</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/DavidSciMeow/Math/tree/main/Meow.Math.Fraction</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>Math, Electronicute, Fraction</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
