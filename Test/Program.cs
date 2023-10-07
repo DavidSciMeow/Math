@@ -57,7 +57,3 @@ using System.Numerics;
 //Console.WriteLine("----------");
 //Console.WriteLine($"{(end - start).TotalMilliseconds} ms / {usedMemory2 - usedMemory1} MB");
 
-Fraction a = new((BigInteger)double.MaxValue, 1);
-a++;
-Console.WriteLine(a >> 50);
-Console.WriteLine((double)a);

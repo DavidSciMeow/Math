@@ -31,6 +31,19 @@ namespace Meow.Util.Math
             num = numerator / t;
             den = denominator / t;
         }
+        /// <summary>
+        /// 初始化一个分数 (使用<b><see langword="大"/></b>整数分子分母)<br/>Init a Struct of Fraction. by Input <b><see langword="Large (Arbitrarily)"/></b> BigInteger 
+        /// </summary>
+        /// <param name="numerator">分子<br/>numerator</param>
+        /// <param name="denominator">分母<br/>denominator</param>
+        /// <param name="Gcd">最大公约数<br/>GreatestCommonDivisor</param>
+        /// <exception cref="ArgumentException"></exception>
+        public Fraction(BigInteger numerator, BigInteger denominator, BigInteger Gcd)
+        {
+            if (denominator == 0) throw new DivideByZeroException();
+            num = numerator / Gcd;
+            den = denominator / Gcd;
+        }
 
         /// <summary>
         /// 化简分数<br/>Simplify fraction
@@ -62,17 +75,17 @@ namespace Meow.Util.Math
         public static (BigInteger comp, Fraction sofrac) operator ~(Fraction f) => (BigInteger.DivRem(f.num,f.den, out var rem), new Fraction(rem, f.den));
 
         public static implicit operator Fraction(long d) => new(d, 1);
-        public static implicit operator double(Fraction d)
+        public static explicit operator double(Fraction d)
         {
             var (intg, remdg) = d >> 20;
-            if(intg < (BigInteger)double.MaxValue)
-            {
-                return (double)intg + (double)remdg / (double)BigInteger.Pow(10, 20);
-            }
-            else
-            {
-                throw new OverflowException();
-            }
+            if(intg > (BigInteger)double.MaxValue) throw new OverflowException();
+            return (double)intg + (double)remdg / (double)BigInteger.Pow(10, 20);
+        }
+        public static implicit operator Fraction(double d)
+        {
+            var num = (long)(d * System.Math.Pow(10, 16));
+            var den = BigInteger.Pow(10, 16);
+            return new(num, den);
         }
 
         public static Fraction operator +(Fraction a) => a;
@@ -82,7 +95,7 @@ namespace Meow.Util.Math
         public static Fraction operator +(Fraction a, Fraction b) => new(a.num * b.den + b.num * a.den, a.den * b.den);
         public static Fraction operator -(Fraction a, Fraction b) => a + (-b);
         public static Fraction operator *(Fraction a, Fraction b) => new(a.num * b.num, a.den * b.den);
-        public static Fraction operator /(Fraction a, Fraction b) => (b.num == 0) ? throw new DivideByZeroException() : new Fraction(a.num * b.den, a.den * b.num);
+        public static Fraction operator /(Fraction a, Fraction b) => (b.num == 0) ? throw new DivideByZeroException() : new Fraction(a.num * b.den, a.den * b.num, BigInteger.GreatestCommonDivisor(a.num * b.den, a.den * b.num));
 
         public bool Equals(Fraction other) => num == other.num && den == other.den;
         public override bool Equals(object? obj) => obj is Fraction f && Equals(f);
@@ -106,7 +119,7 @@ namespace Meow.Util.Math
             }
             else
             {
-                return $"{num}\n-------\n{den}";
+                return $"{num} / {den}";
             }
         }
 
