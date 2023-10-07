@@ -1,4 +1,4 @@
-﻿# Meow.Util.Math.Fraction
+﻿# Meow.Math.Fraction
 
 <img src="https://img.shields.io/nuget/vpre/Meow.Math.Fraction?label=NuGet%20Version" alt="nugetVersion"/>
 <img src="https://img.shields.io/nuget/dt/Meow.Math.Fraction?label=Nuget%20Download" alt="nugetDownload"/>
