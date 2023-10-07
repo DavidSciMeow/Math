@@ -1,9 +1,6 @@
-﻿using Meow.Math.Graph;
-using Meow.Math.Graph.Struct;
-using Meow.Util.Math;
+﻿using Meow.Util.Math;
+using NeinMath;
 using System.Diagnostics;
-using System.Numerics;
-using System.Runtime.InteropServices;
 
 //DateTime start = DateTime.Now;
 //double usedMemory1 = Process.GetCurrentProcess().WorkingSet64 / 1024.0 / 1024.0;
@@ -60,8 +57,14 @@ using System.Runtime.InteropServices;
 //Console.WriteLine("----------");
 //Console.WriteLine($"{(end - start).TotalMilliseconds} ms / {usedMemory2 - usedMemory1} MB");
 
-double a = (double)52163/16604;
-Fraction b = new(52163, 16604);
-Console.WriteLine(a);
-Console.WriteLine(~b);
-
+var st = Stopwatch.StartNew();
+Fraction a = 1;
+for (int i = 0; i < 10000; i++)
+{
+    a /= 3;
+    a /= 2;
+    a *= 4;
+}
+st.Stop();
+Console.WriteLine($"{st.ElapsedMilliseconds} ms");
+Console.WriteLine(a >> 20);

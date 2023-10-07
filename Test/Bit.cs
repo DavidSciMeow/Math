@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace Meow.Math
 {
-
     /// <summary>
     /// 二进制帮助类
     /// <para> 本二进制帮助类采用如下索引方式 </para>
@@ -42,7 +41,6 @@ namespace Meow.Math
         /// </summary>
         /// <returns></returns>
         public readonly byte ToByte() => output;
-
         /// <summary>
         /// 索引位
         /// 本二进制帮助类采用如下索引方式 <br/>
@@ -74,7 +72,6 @@ namespace Meow.Math
         public static implicit operator Bit(byte d) => new(d);
         /// <inheritdoc/>
         public static explicit operator byte(Bit d) => d.output;
-
         /// <inheritdoc/>
         public override readonly string? ToString() => null;
         /// <inheritdoc/>
