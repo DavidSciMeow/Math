@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Meow.Math.Fraction\Meow.Math.Fraction.csproj" />
     <ProjectReference Include="..\Meow.Math.Graph\Meow.Math.Graph.csproj" />
   </ItemGroup>
 
