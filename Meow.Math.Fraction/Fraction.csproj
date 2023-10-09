@@ -22,6 +22,8 @@ it use a heap allocation represent a number, as if ensure a number is not trunca
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <IncludeSymbols>False</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <RepositoryUrl>https://github.com/DavidSciMeow/Math/tree/main/Meow.Math.Fraction</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/DavidSciMeow/Math/tree/main/Meow.Math.Fraction</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
