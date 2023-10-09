@@ -1,4 +1,6 @@
-﻿namespace Meow.Math.Graph.ErrorList
+﻿using System;
+
+namespace Meow.Math.Graph.ErrorList
 {
     /// <summary>
     /// 节点遍历不可达错误<br/>

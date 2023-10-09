@@ -20,8 +20,8 @@ double usedMemory1 = Process.GetCurrentProcess().WorkingSet64 / 1024.0 / 1024.0;
 
 
     Graph<string> g = Util.ReadMap(s.Split("\n"));
-    var sx = g.BellmanFord_Tree("n1");
-    Console.WriteLine(sx);
+    var sx = g.BellmanFord_Tree("n4");
+    Console.WriteLine(sx.ToString());
 
     //    var l = File.ReadAllLines("./a");
     //    Graph<string> g = Util.ReadMap(l);

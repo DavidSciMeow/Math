@@ -1,5 +1,7 @@
 ﻿using Meow.Math.Graph.ErrorList;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Meow.Math.Graph.Struct
 {
@@ -19,7 +21,7 @@ namespace Meow.Math.Graph.Struct
         /// 节点搜索表 键值对为 [节点识别号, 节点本身]<br/>
         /// NodeTables which structure [Key, Value] is [NodeID, That Node itself ]
         /// </summary>
-        private Dictionary<T, GraphNode<T>> Nodes { get; init; } = new();
+        private Dictionary<T, GraphNode<T>> Nodes { get; } = new Dictionary<T, GraphNode<T>>();
         /// <summary>
         /// 节点边列表<br/>
         /// Adjacent Edge Table which struct is a HashSet by each Edge
@@ -29,7 +31,7 @@ namespace Meow.Math.Graph.Struct
         {
             get
             {
-                HashSet<Edge<T>> Set = new();
+                HashSet<Edge<T>> Set = new HashSet<Edge<T>>();
                 foreach(var i in Nodes) //O(n) by Total Nodes
                 {
                     foreach(var j in i.Value) //O(j) by Edge create link in nodes
@@ -47,14 +49,14 @@ namespace Meow.Math.Graph.Struct
         /// <para>时间复杂度(Time Complexity) :: <i><b><see langword="O(1)" /></b></i></para>
         /// <param name="node">要添加的节点识别名<br/> Node Id </param>
         /// <returns>节点是否创建成功<br/> is Node be created</returns>
-        public bool Add(T node) => Nodes.TryAdd(node, new(node));
+        public void Add(T node) => Nodes.Add(node, new GraphNode<T>(node));
         /// <summary>
         /// 添加节点 <br/> Add this Node
         /// <para>时间复杂度(Time Complexity) :: <i><b><see langword="O(1)" /></b></i></para>
         /// </summary>
         /// <param name="node">要添加的节点<br/> Node will be add </param>
         /// <returns>节点是否添加成功<br/> is Node be created</returns>
-        public bool Add(GraphNode<T> node) => Nodes.TryAdd(node.Id, node);
+        public void Add(GraphNode<T> node) => Nodes.Add(node.Id, node);
         /// <summary>
         /// 检查是否存在节点<br/>Exist Node or not.
         /// <para>时间复杂度(Time Complexity) :: <i><b><see langword="O(1)" /></b></i></para>
@@ -79,19 +81,19 @@ namespace Meow.Math.Graph.Struct
         /// <exception cref="NodeNotExistException"></exception>
         public List<T> BFS(T node)
         {
-            if (node is null || !Nodes.ContainsKey(node)) throw new NodeNotExistException();
-            HashSet<T> visited = new() { node };//标记头节点
-            Queue<T> queue = new();
-            List<T> path = new();
+            if (!(node is T) || !Nodes.ContainsKey(node)) throw new NodeNotExistException();
+            HashSet<T> visited = new HashSet<T>() { node };//标记头节点
+            Queue<T> queue = new Queue<T>();
+            List<T> path = new List<T>();
             queue.Enqueue(node);//头节点入队
-            while (queue.Any()) //σ(n) 任意队列不空
+            while (queue.Count > 0) //σ(n) 任意队列不空
             {
                 var s = queue.Peek();//获取队列头元素
                 path.Add(s);//添加路径
                 queue.Dequeue();//末尾的元素出队
-                foreach (var (i,_) in Nodes[s]) //σ(k) 获取节点的邻接节点
+                foreach (var i in Nodes[s]) //σ(k) 获取节点的邻接节点
                 {
-                    if (visited.Add(i)) queue.Enqueue(i);//没添加过的元素入队
+                    if (visited.Add(i.Key)) queue.Enqueue(i.Key);//没添加过的元素入队
                 }
             }
             return path;
@@ -105,20 +107,20 @@ namespace Meow.Math.Graph.Struct
         /// <exception cref="NodeNotExistException"></exception>
         public List<T> DFS(T node)
         {
-            if (node is null || !Nodes.ContainsKey(node)) throw new NodeNotExistException();
-            HashSet<T> visited = new() { node };//首元素访问标记
-            List<T> path = new() { node };//头元素入搜索表
-            Stack<T> ss = new();
+            if (!(node is T) || !Nodes.ContainsKey(node)) throw new NodeNotExistException();
+            HashSet<T> visited = new HashSet<T>() { node };//首元素访问标记
+            List<T> path = new List<T>() { node };//头元素入搜索表
+            Stack<T> ss = new Stack<T>();
             ss.Push(node);//搜索元素入栈
             while (ss.Any())//σ(n) 若栈不空
             {
                 bool _isEdgeVisited = true;//标记边访问
-                foreach (var (i, _) in Nodes[ss.Peek()])//σ(n-k) 获得下一节点
+                foreach (var i in Nodes[ss.Peek()])//σ(n-k) 获得下一节点
                 {
-                    if (visited.Add(i))//未访问节点则标记访问
+                    if (visited.Add(i.Key))//未访问节点则标记访问
                     {
-                        ss.Push(i);//入栈
-                        path.Add(i);//添加访问表
+                        ss.Push(i.Key);//入栈
+                        path.Add(i.Key);//添加访问表
                         _isEdgeVisited = false;//取消边访问
                         break;
                     }
@@ -138,10 +140,10 @@ namespace Meow.Math.Graph.Struct
         public int GetTotalWeight(T[] nodelist)
         {
             int totalWeight = 0;
-            T? temp = default;
+            T temp = default;
             foreach(var node in nodelist)
             {
-                if(temp is not null && Exist(temp))
+                if(temp is T && Exist(temp))
                 {
                     if (this[temp].Exist(node))
                     {
@@ -170,11 +172,11 @@ namespace Meow.Math.Graph.Struct
         /// <returns>生成的最短路径 <br/> the Least cost path</returns>
         /// <exception cref="NodeNotExistException"></exception>
         /// <exception cref="Exception"></exception>
-        public List<T> Dijkstra(T start, T end, Func<T, T, int>? HeuristicFunc = null)
+        public List<T> Dijkstra(T start, T end, Func<T, T, int> HeuristicFunc = null)
         {
             if (!Exist(start) || !Exist(end)) throw new NodeNotExistException();//不存在这两个节点
 
-            Queue<T> queue = new();//生成队列
+            Queue<T> queue = new Queue<T>();//生成队列
             queue.Enqueue(start);//头节点入队列
             var edges = new Dictionary<T, T>();//经过的边
             var pathcost = new Dictionary<T, int> { { start, 0 } };//经过的每个节点的数据
@@ -197,7 +199,7 @@ namespace Meow.Math.Graph.Struct
 
             if (edges.ContainsKey(end))
             {
-                Stack<T> path = new();//形成路径
+                Stack<T> path = new Stack<T>();//形成路径
                 path.Push(end);//末尾位置入栈
                 var node = edges[end];//取末尾位置链接点 σ(1)
                 while (!node.Equals(start))//前序寻找 最大次数σ(k)
@@ -230,11 +232,11 @@ namespace Meow.Math.Graph.Struct
         /// </returns>
         /// <exception cref="NodeNotExistException"></exception>
         /// <exception cref="Exception"></exception>
-        public List<Edge<T>> Dijkstra_Edge(T start, T end, Func<T, T, int>? HeuristicFunc = null)
+        public List<Edge<T>> Dijkstra_Edge(T start, T end, Func<T, T, int> HeuristicFunc = null)
         {
             if (!Exist(start) || !Exist(end)) throw new NodeNotExistException();//不存在这两个节点
 
-            Queue<T> queue = new();//生成队列
+            Queue<T> queue = new Queue<T>();//生成队列
             queue.Enqueue(start);//头节点入队列
             var edges = new Dictionary<T, T>();//经过的边
             var pathcost = new Dictionary<T, int> { { start, 0 } };//经过的每个节点的数据
@@ -257,12 +259,12 @@ namespace Meow.Math.Graph.Struct
 
             if (edges.ContainsKey(end))
             {
-                Stack<Edge<T>> path = new();//形成路径
+                Stack<Edge<T>> path = new Stack<Edge<T>>();//形成路径
                 var node = end;//取末尾位置链接点 σ(1)
                 var next = edges[end];//前序节点更新
                 while (!node.Equals(start))//前序寻找 最大次数σ(k)
                 {
-                    path.Push(new(next, node, this[next][node]));//节点入栈
+                    path.Push(new Edge<T>(next, node, this[next][node]));//节点入栈
                     node = next;
                     if (edges.ContainsKey(node)) next = edges[node];//前序节点更新
                 }
@@ -281,10 +283,10 @@ namespace Meow.Math.Graph.Struct
         /// <returns></returns>
         public (Dictionary<T, int> Dist, Dictionary<T,T> AdjacencyTable) BellmanFord(T start)
         {
-            Dictionary<T, int> dist = new(); //源点最短路径表
-            Dictionary<T, T> path = new();//前序节点表
+            Dictionary<T, int> dist = new Dictionary<T, int>(); //源点最短路径表
+            Dictionary<T, T> path = new Dictionary<T, T>();//前序节点表
 
-            foreach(var i in Nodes) dist.TryAdd(i.Key, int.MaxValue); //初始化节点表 O(n)
+            foreach(var i in Nodes) dist.Add(i.Key, int.MaxValue); //初始化节点表 O(n)
             dist[start] = 0;//设置起始点为0
 
             for (int i = 1; i <= Nodes.Count - 1; i++) // 松弛所有边 |V| - 1 次 (并记录任意边的前序) O(n-1)
@@ -293,7 +295,7 @@ namespace Meow.Math.Graph.Struct
                 {
                     if (dist[u] != int.MaxValue && dist[u] + w < dist[v])
                     {
-                        path.TryAdd(v, u);
+                        path.Add(v, u);
                         dist[v] = dist[u] + w;
                     }
                 }
@@ -314,10 +316,10 @@ namespace Meow.Math.Graph.Struct
         /// <exception cref="BFANWCDetectedException"></exception>
         public List<Edge<T>> BellmanFord_Edge(T Start, T End)
         {
-            Dictionary<T, int> dist = new(); //源点最短路径表
-            Dictionary<T, (T,T,int)> ppath = new();//前序节点表
+            Dictionary<T, int> dist = new Dictionary<T, int>(); //源点最短路径表
+            Dictionary<T, (T,T,int)> ppath = new Dictionary<T, (T, T, int)>();//前序节点表
 
-            foreach (var i in Nodes) dist.TryAdd(i.Key, int.MaxValue); //初始化节点表 O(n)
+            foreach (var i in Nodes) dist.Add(i.Key, int.MaxValue); //初始化节点表 O(n)
             dist[Start] = 0;//设置起始点为0
 
             for (int i = 1; i <= Nodes.Count - 1; i++) // 松弛所有边 |V| - 1 次 (并记录任意边的前序) O(n-1)
@@ -326,7 +328,7 @@ namespace Meow.Math.Graph.Struct
                 {
                     if (dist[u] != int.MaxValue && dist[u] + w < dist[v])
                     {
-                        ppath.TryAdd(v, (v,u,w));
+                        ppath.Add(v, (v,u,w));
                         dist[v] = dist[u] + w;
                     }
                 }
@@ -340,11 +342,11 @@ namespace Meow.Math.Graph.Struct
                 }
             }
 
-            Stack<Edge<T>> path = new(); //逆查所有节点
+            Stack<Edge<T>> path = new Stack<Edge<T>>(); //逆查所有节点
             while (!End.Equals(Start))
             {
                 var (v,u,i) = ppath[End]; //取前节点边
-                path.Push(new(u,v,i)); //压倒序节点栈
+                path.Push(new Edge<T>(u,v,i)); //压倒序节点栈
                 End = u;//前移节点
             }
             return path.ToList();
@@ -357,8 +359,8 @@ namespace Meow.Math.Graph.Struct
         public Tree<T> BellmanFord_Tree(T start)
         {
             var (_,at) = BellmanFord(start);
-            Tree<T> tree = new(start);
-            foreach(var (v,u) in at) tree.AddNode(v, u);
+            Tree<T> tree = new Tree<T>(start);
+            foreach(var i in at) tree.AddNode(i.Key, i.Value);
             return tree;
         }
         /// <summary>
@@ -368,15 +370,10 @@ namespace Meow.Math.Graph.Struct
         /// <returns>负权环边列表<br/>the edge create the negative loop</returns>
         public List<Edge<T>> BellmanFord_NWCDetector(Dictionary<T, int> Dist)
         {
-            List<Edge<T>> collection = new();
-            foreach (var (u, v, w) in Edges)
-            {
-                if (Dist[u] != int.MaxValue && Dist[u] + w < Dist[v]) collection.Add(new(u, v, w));
-            }
+            List<Edge<T>> collection = new List<Edge<T>>();
+            foreach (var (u, v, w) in Edges) if (Dist[u] != int.MaxValue && Dist[u] + w < Dist[v]) collection.Add(new Edge<T>(u, v, w));
             return collection;
         }
 
-
     }
-
 }

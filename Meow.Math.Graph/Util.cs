@@ -1,4 +1,6 @@
 ﻿using Meow.Math.Graph.Struct;
+using System;
+using System.Linq;
 
 namespace Meow.Math.Graph
 {
@@ -12,9 +14,9 @@ namespace Meow.Math.Graph
         /// </summary>
         /// <param name="seplines"></param>
         /// <returns></returns>
-        public static Tree<string>? ReadMappedTree(string[] seplines)
+        public static Tree<string> ReadMappedTree(string[] seplines)
         {
-            Tree<string>? tree = null;
+            Tree<string> tree = null;
             bool _isRootDefine = false;
             foreach (string line in seplines)
             {
@@ -22,7 +24,7 @@ namespace Meow.Math.Graph
                 {
                     if (!_isRootDefine)
                     {
-                        tree = new(line.Replace("*", ""));
+                        tree = new Tree<string>(line.Replace("*", ""));
                         _isRootDefine = true;
                     }
                     else
@@ -61,7 +63,7 @@ namespace Meow.Math.Graph
         /// <returns></returns>
         public static Graph<string> ReadMap(string[] seplines)
         {
-            Graph<string> ms = new();
+            Graph<string> ms = new Graph<string>();
             foreach (string line in seplines)
             {
                 int weight = 1;
@@ -72,7 +74,7 @@ namespace Meow.Math.Graph
                     var n1 = line.Split('-');
                     node1 = n1[0];
 
-                    if (n1[1].Contains(':'))
+                    if (n1[1].Contains(":"))
                     {
                         var n2 = n1[1].Split(':');
                         if (int.TryParse(n2[1], out var _w))
@@ -96,12 +98,12 @@ namespace Meow.Math.Graph
                     ms[node1].Add(node2, weight);
                     ms[node2].Add(node1, weight);
                 }
-                else if (line.Contains('>'))
+                else if (line.Contains(">"))
                 {
                     var n1 = line.Split('>');
                     node1 = n1[0];
 
-                    if (n1[1].Contains(':'))
+                    if (n1[1].Contains(":"))
                     {
                         var n2 = n1[1].Split(':');
                         if (int.TryParse(n2[1], out var _w))

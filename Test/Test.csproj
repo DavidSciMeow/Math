@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Meow.Math.Graph\Meow.Math.Graph.csproj" />
+    <ProjectReference Include="..\Meow.Math.Graph\Graph.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
-﻿using Meow.Math.Graph.ErrorList;
+﻿using System;
+using Meow.Math.Graph.ErrorList;
 
 namespace Meow.Math.Graph.Struct
 {
@@ -20,11 +21,11 @@ namespace Meow.Math.Graph.Struct
         /// <summary>
         /// 边权重<br/>Edge Weight
         /// </summary>
-        public int Weight = 1;
+        public int Weight;
         /// <summary>
         /// 边是否具有方向<br/>Edge is directional
         /// </summary>
-        public bool isDirectional = false;
+        public bool isDirectional;
 
         /// <summary>
         /// 创建一个边<br/>Create A Edge
@@ -44,21 +45,21 @@ namespace Meow.Math.Graph.Struct
         }
 
         /// <inheritdoc/>
-        public override readonly string ToString() => $"{Start}{(isDirectional ? $"-{Weight}>" : $"-{Weight}-")}{End}";
+        public override string ToString() => $"{Start}{(isDirectional ? $"-{Weight}>" : $"-{Weight}-")}{End}";
         /// <inheritdoc/>
-        public override bool Equals(object? obj) => obj is Edge<T> edge && Equals(edge);
+        public override bool Equals(object obj) => obj is Edge<T> edge && Equals(edge);
         /// <inheritdoc/>
         public bool Equals(Edge<T> other) => isDirectional
                 ? (Start.Equals(other.Start) && End.Equals(other.End)) || (Start.Equals(other.End) && End.Equals(other.Start))
                 : Start.Equals(other.Start) && End.Equals(other.End);
         /// <inheritdoc/>
-        public override readonly int GetHashCode() => HashCode.Combine(Start, End);
+        public override int GetHashCode() => Start.GetHashCode() ^ End.GetHashCode();
         /// <inheritdoc/>
         public static bool operator ==(Edge<T> left, Edge<T> right) => left.Equals(right);
         /// <inheritdoc/>
         public static bool operator !=(Edge<T> left, Edge<T> right) => !(left == right);
         /// <inheritdoc/>
-        public readonly void Deconstruct(out T u, out T v, out int w, out bool IsDirectional)
+        public void Deconstruct(out T u, out T v, out int w, out bool IsDirectional)
         {
             u = Start;
             v = End;
@@ -66,7 +67,7 @@ namespace Meow.Math.Graph.Struct
             IsDirectional = isDirectional;
         }
         /// <inheritdoc/>
-        public readonly void Deconstruct(out T u, out T v, out int w)
+        public void Deconstruct(out T u, out T v, out int w)
         {
             u = Start;
             v = End;

@@ -1,4 +1,6 @@
-﻿namespace Meow.Math.Graph.Interface
+﻿using System;
+
+namespace Meow.Math.Graph.Interface
 {
     /// <summary>
     /// 可遍历节点接口<br/>Traversable Node Interface
@@ -11,13 +13,13 @@
         /// <para>时间复杂度(Time Complexity) :: <i><b><see langword="O(1) ~ O(n)" /></b></i></para>
         /// </summary>
         /// <param name="node">节点名<br/>NodeName</param>
-        public bool Delete(T node);
+        bool Delete(T node);
         /// <summary>
         /// 判定一个节点是否连接<br/>Determin A Node Link Or Not
         /// <para>时间复杂度(Time Complexity) :: <i><b><see langword="O(1) ~ O(n)" /></b></i></para>
         /// </summary>
         /// <param name="node">节点识别名<br/>NodeName</param>
-        public bool Exist(T node);
+        bool Exist(T node);
     }
 
     /// <summary>
@@ -31,13 +33,13 @@
         /// <para>时间复杂度(Time Complexity) :: <i><b><see langword="O(n)" /></b></i></para>
         /// </summary>
         /// <param name="node">节点<br/>Node</param>
-        public void AddRear(T node);
+        void AddRear(T node);
         /// <summary>
         /// 添加一个连接节点(朝表的前部)<br/>Link A Node To List's Front Side
         /// <para>时间复杂度(Time Complexity) :: <i><b><see langword="O(n)" /></b></i></para>
         /// </summary>
         /// <param name="node">节点<br/>Node</param>
-        public void AddFront(T node);
+        void AddFront(T node);
     }
 
     /// <summary>
@@ -51,6 +53,6 @@
         /// <para>时间复杂度(Time Complexity) :: <i><b><see langword="O(1)" /></b></i></para>
         /// </summary>
         /// <param name="node">节点<br/>Node</param>
-        public bool Add(T node, int weight);
+        void Add(T node, int weight);
     }
 }

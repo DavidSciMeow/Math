@@ -18,7 +18,7 @@ namespace Meow.Math.Graph.Struct
         /// <summary>
         /// 内容锁<br/> multi thread safe lock
         /// </summary>
-        object ContentLock { get; set; } = new object();
+        object ContentLock { get; set; }
         /// <summary>
         /// 当前节点包装类<br/>Current Node
         /// </summary>
@@ -26,37 +26,37 @@ namespace Meow.Math.Graph.Struct
         /// <summary>
         /// 当前节点链接的节点<br/>Node Which Linked This Node.
         /// </summary>
-        T[] Linked { get; set; } = Array.Empty<T>();
+        T[] Linked { get; set; }
         /// <summary>
         /// 当前节点链接的节点数(出度)<br/>out-degree of this Node
         /// </summary>
-        public readonly int Count { get => Linked.Length; }
+        public int Count { get => Linked.Length; }
         /// <summary>
         /// 根据节点顺序获取当前的链接节点<br/>Gets the linked nodes based on node order
         /// </summary>
         /// <param name="name">节点的识别<br/>Node ID</param>
         /// <returns>节点<br/>Node</returns>
-        public readonly T this[int pos] => Linked[pos];
+        public T this[int pos] => Linked[pos];
         /// <summary>
         /// 父节点<br/>Parents
         /// </summary>
-        public T? Parents { get; init; } = default;
+        public T Parents { get; private set; }
         /// <summary>
         /// 兄弟节点<br/>Siblings
         /// </summary>
-        public T[] Siblings { get; init; }
+        public T[] Siblings { get; private set; }
         /// <summary>
         /// 子节点<br/>Descendants
         /// </summary>
-        public readonly T[] Descendants { get => Linked; }
+        public T[] Descendants { get => Linked; }
         /// <summary>
         /// 判定当前树节点是否是根节点<br/>Determine node is Root or not
         /// </summary>
-        public readonly bool IsRoot => Parents is null;
+        public bool IsRoot => !(Parents is T);
         /// <summary>
         /// 判定当前树节点是否是叶节点<br/>Determine node is Leaf or not
         /// </summary>
-        public readonly bool IsLeaf => !(Descendants?.Length > 0);
+        public bool IsLeaf => !(Descendants?.Length > 0);
 
         public void AddRear(T node)
         {
@@ -78,7 +78,7 @@ namespace Meow.Math.Graph.Struct
                 Linked = retx;
             }
         }
-        public readonly bool Delete(T node)
+        public bool Delete(T node)
         {
             lock (ContentLock)
             {
@@ -95,7 +95,7 @@ namespace Meow.Math.Graph.Struct
                 return false;
             }
         }
-        public readonly bool Exist(T node)
+        public bool Exist(T node)
         {
             lock (ContentLock)
             {
@@ -110,8 +110,10 @@ namespace Meow.Math.Graph.Struct
         /// <param name="parents">父节点<br/>Node Parents</param>
         /// <param name="descendants">子节点<br/>Node Descendants</param>
         /// <param name="siblings">兄弟节点<br/>Node Siblings</param>
-        public TreeNode(T id, T? parents = default,  T[]? descendants = null, T[]? siblings = null)
+        public TreeNode(T id, T parents = default,  T[] descendants = null, T[] siblings = null)
         {
+            ContentLock = new object();
+            Linked = Array.Empty<T>();
             Id = id;
             Parents = parents;
             Siblings = siblings ?? Array.Empty<T>();
@@ -131,14 +133,14 @@ namespace Meow.Math.Graph.Struct
         }
 
         /// <inheritdoc/>
-        public override readonly int GetHashCode() => Id.GetHashCode();
+        public override int GetHashCode() => Id.GetHashCode();
         /// <inheritdoc/>
-        public readonly IEnumerator<T> GetEnumerator() => Linked.ToList().GetEnumerator();
+        public IEnumerator<T> GetEnumerator() => Linked.ToList().GetEnumerator();
 
         /// <inheritdoc/>
-        readonly IEnumerator IEnumerable.GetEnumerator() => Linked.ToList().GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => Linked.ToList().GetEnumerator();
         /// <inheritdoc/>
-        public readonly bool Equals(TreeNode<T>? other) => other is TreeNode<T> t && t.Id.Equals(Id);
+        public bool Equals(TreeNode<T>? other) => other is TreeNode<T> t && t.Id.Equals(Id);
     }
 
 }
