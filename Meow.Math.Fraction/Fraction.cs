@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 using System.Numerics;
 
 namespace Meow.Math
@@ -53,7 +53,7 @@ namespace Meow.Math
         /// 已经<b><see langword="化简"/></b>后的分数<br/>
         /// Returns a <b><see langword="reduced"/></b> fraction.
         /// </returns>
-        public static Fraction operator !(Fraction d) => new(d.num, d.den);
+        public static Fraction operator !(Fraction d) => new Fraction(d.num, d.den);
         /// <summary>
         /// 尝试将分数精确至 <paramref name="k"/> 个小数位数<br/>Try to make the fraction accurate to <paramref name="k"/> decimal places
         /// </summary>
@@ -72,15 +72,15 @@ namespace Meow.Math
         /// 返回一个 <b><see langword="(整数位, 复分数)"/></b> 表示的元组<br/>
         /// Returns a tuple represented by <b><see langword="(BigInteger part, fraction part)"/></b>.
         /// </returns>
-        public static (BigInteger comp, Fraction sofrac) operator ~(Fraction f) => (BigInteger.DivRem(f.num,f.den, out var rem), new Fraction(rem, f.den));
+        public static (BigInteger comp, Fraction sofrac) operator ~(Fraction f) => (BigInteger.DivRem(f.num, f.den, out var rem), new Fraction(rem, f.den));
 
         /// <inheritdoc/>
-        public static implicit operator Fraction(long d) => new(d, 1);
+        public static implicit operator Fraction(long d) => new Fraction(d, 1);
         /// <inheritdoc/>
         public static explicit operator double(Fraction d)
         {
             var (intg, remdg) = d >> 20;
-            if(intg > (BigInteger)double.MaxValue) throw new OverflowException();
+            if (intg > (BigInteger)double.MaxValue) throw new OverflowException();
             return (double)intg + (double)remdg / (double)BigInteger.Pow(10, 20);
         }
         /// <inheritdoc/>
@@ -88,30 +88,30 @@ namespace Meow.Math
         {
             var num = (long)(d * System.Math.Pow(10, 16));
             var den = BigInteger.Pow(10, 16);
-            return new(num, den);
+            return new Fraction(num, den);
         }
         /// <inheritdoc/>
         public static Fraction operator +(Fraction a) => a;
         /// <inheritdoc/>
-        public static Fraction operator -(Fraction a) => new(-a.num, a.den);
+        public static Fraction operator -(Fraction a) => new Fraction(-a.num, a.den);
         /// <inheritdoc/>
         public static Fraction operator ++(Fraction a) => a + 1;
         /// <inheritdoc/>
         public static Fraction operator --(Fraction a) => a - 1;
         /// <inheritdoc/>
-        public static Fraction operator +(Fraction a, Fraction b) => new(a.num * b.den + b.num * a.den, a.den * b.den);
+        public static Fraction operator +(Fraction a, Fraction b) => new Fraction(a.num * b.den + b.num * a.den, a.den * b.den);
         /// <inheritdoc/>
         public static Fraction operator -(Fraction a, Fraction b) => a + (-b);
         /// <inheritdoc/>
-        public static Fraction operator *(Fraction a, Fraction b) => new(a.num * b.num, a.den * b.den);
+        public static Fraction operator *(Fraction a, Fraction b) => new Fraction(a.num * b.num, a.den * b.den);
         /// <inheritdoc/>
         public static Fraction operator /(Fraction a, Fraction b) => (b.num == 0) ? throw new DivideByZeroException() : new Fraction(a.num * b.den, a.den * b.num, BigInteger.GreatestCommonDivisor(a.num * b.den, a.den * b.num));
         /// <inheritdoc/>
         public bool Equals(Fraction other) => num == other.num && den == other.den;
         /// <inheritdoc/>
-        public override bool Equals(object? obj) => obj is Fraction f && Equals(f);
+        public override bool Equals(object obj) => obj is Fraction f && Equals(f);
         /// <inheritdoc/>
-        public override int GetHashCode() => HashCode.Combine(num, den);
+        public override int GetHashCode() => num.GetHashCode() ^ den.GetHashCode();
         /// <inheritdoc/>
         public static bool operator ==(Fraction left, Fraction right) => left.Equals(right);
         /// <inheritdoc/>
