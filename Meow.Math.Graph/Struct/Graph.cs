@@ -36,7 +36,7 @@ namespace Meow.Math.Graph.Struct
                 {
                     foreach(var j in i.Value) //O(j) by Edge create link in nodes
                     {
-                        Set.Add(new Edge<T>(i.Key, j.Key, j.Value, this[j.Key].Exist(i.Key))); //O(1) by HashSet
+                        Set.Add(new Edge<T>(i.Key, j.Key, j.Value, !this[j.Key].Exist(i.Key))); //O(1) by HashSet
                     }
                 }
                 return Set;

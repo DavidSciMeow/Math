@@ -21,12 +21,12 @@ namespace Meow.Math.Graph.Struct
         /// 邻接矩阵 键值对为 [节点识别号, 节点的权重]<br/>
         /// Adjacency Tables which structure [Key, Value] is [Node ID (which linked), Edges Weight]
         /// </summary>
-        public Dictionary<T, int> Edges { get; }
+        private Dictionary<T, int> Edges { get; }
         /// <summary>
         /// 初始化节点 <br/> Init a Node
         /// </summary>
         /// <param name="id">节点识别号<br/>Graph Node Id</param>
-        public GraphNode(T id) : this()
+        public GraphNode(T id)
         {
             Id = id;
             Edges = new Dictionary<T, int>();

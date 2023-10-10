@@ -68,22 +68,15 @@ namespace Meow.Math.Graph.Struct
         /// <param name="node">节点名<br/>NodeID</param>
         /// <param name="RootBy">父节点名<br/>Root Node ID</param>
         /// <returns>节点是否成功添加<br/>the Node addition completeness</returns>
-        public bool AddNode(T node, T RootBy)
+        public void AddNode(T node, T RootBy)
         {
             if (!(RootBy is T)) RootBy = Root;
-            if (AdjacencyTables.ContainsKey(node)) return false; //contains
 
             AdjacencyTables.Add(node, new HashSet<T>()); //addnode
 
-            if (!AdjacencyTables.ContainsKey(RootBy) &&
-                !AdjacencyTables[RootBy].Contains(node))
+            if (AdjacencyTables.ContainsKey(RootBy) && !AdjacencyTables[RootBy].Contains(node))
             {
                 AdjacencyTables[RootBy].Add(node);//link father
-                return true;
-            }
-            else
-            {
-                return false;
             }
 
         }
@@ -96,7 +89,7 @@ namespace Meow.Math.Graph.Struct
         /// <exception cref="NodeNotExistException"></exception>
         public List<T> BFS(T node)
         {
-            if (!(node is T) || AdjacencyTables.ContainsKey(node)) throw new NodeNotExistException();
+            if (!(node is T) || !AdjacencyTables.ContainsKey(node)) throw new NodeNotExistException();
             HashSet<T> visited = new HashSet<T>() { node };//标记头节点
             Queue<T> queue = new Queue<T>();
             List<T> path = new List<T>();
@@ -125,7 +118,7 @@ namespace Meow.Math.Graph.Struct
         /// <exception cref="NodeNotExistException"></exception>
         public List<T> DFS(T node = default)
         {
-            if (node is T && !AdjacencyTables.ContainsKey(node)) throw new NodeNotExistException();
+            if (!(node is T) || !AdjacencyTables.ContainsKey(node)) throw new NodeNotExistException();
             HashSet<T> visited = new HashSet<T>() { node };//首元素访问标记
             List<T> path = new List<T>() { node };//头元素入搜索表
             Stack<T> ss = new Stack<T>();
@@ -177,7 +170,7 @@ namespace Meow.Math.Graph.Struct
             Stack<T> ss = new Stack<T>();
             ss.Push(Root);//搜索元素入栈
             sb.Append($"{Root}\n");
-            while (ss.Any())//σ(n) 若栈不空
+            while (ss.Count > 0)//σ(n) 若栈不空
             {
                 var parent = ss.Peek();//获取栈顶元素
                 bool _isEdgeVisited = true;//标记边访问
