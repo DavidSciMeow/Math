@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.33711.374
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fraction", "Meow.Math.Fraction\Fraction.csproj", "{6F6FA29B-7CF3-4429-99ED-72E7E824AF37}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Graph", "Meow.Math.Graph\Graph.csproj", "{71B93C28-E0DD-476E-AF16-B853F9619C5E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{BA440E88-3BD3-4D73-A213-8CA4F6AD3239}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6F6FA29B-7CF3-4429-99ED-72E7E824AF37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F6FA29B-7CF3-4429-99ED-72E7E824AF37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F6FA29B-7CF3-4429-99ED-72E7E824AF37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F6FA29B-7CF3-4429-99ED-72E7E824AF37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71B93C28-E0DD-476E-AF16-B853F9619C5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71B93C28-E0DD-476E-AF16-B853F9619C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71B93C28-E0DD-476E-AF16-B853F9619C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71B93C28-E0DD-476E-AF16-B853F9619C5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA440E88-3BD3-4D73-A213-8CA4F6AD3239}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA440E88-3BD3-4D73-A213-8CA4F6AD3239}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA440E88-3BD3-4D73-A213-8CA4F6AD3239}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA440E88-3BD3-4D73-A213-8CA4F6AD3239}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AA73E63F-30A3-4992-A9E3-72976B28A480}
+	EndGlobalSection
+EndGlobal

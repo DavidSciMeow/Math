@@ -5,22 +5,26 @@ using System.Diagnostics;
 DateTime start = DateTime.Now;
 double usedMemory1 = Process.GetCurrentProcess().WorkingSet64 / 1024.0 / 1024.0;
 {
-    //string s = "" +
-    //    "n1-n2\n" +
-    //    "n1-n5\n" +
-    //    "n2-n6\n" +
-    //    "n6-n3\n" +
-    //    "n6-n7\n" +
-    //    "n3-n7\n" +
-    //    "n7-n4\n" +
-    //    "n3-n4\n" +
-    //    "n7-n8\n" +
-    //    "n8-n4\n" +
-    //    "";
+    string s = "" +
+        "n1-n2\n" +
+        "n1-n5\n" +
+        "n2-n6\n" +
+        "n6-n3\n" +
+        "n6-n7\n" +
+        "n3-n7\n" +
+        "n7-n4\n" +
+        "n3-n4\n" +
+        "n7-n8\n" +
+        "n8-n4\n" +
+        "";
 
 
-    //Graph<string> g = Util.ReadMap(s.Split("\n"));
-    //Console.WriteLine(g.BellmanFord_Tree("n1"));
+    Graph<string> g = Util.ReadMap(s.Split("\n"));
+    var tt = g.FloydWarshall("n1");
+    foreach(var i in tt)
+    {
+        Console.WriteLine(i);
+    }
 
     //    var l = File.ReadAllLines("./a");
     //    Graph<string> g = Util.ReadMap(l);

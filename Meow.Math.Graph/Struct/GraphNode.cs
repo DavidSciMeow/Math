@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Meow.Math.Graph.Struct
 {
@@ -12,7 +13,6 @@ namespace Meow.Math.Graph.Struct
     /// <typeparam name="T">图节点类型<br/> Graph Node Type</typeparam>
     public readonly struct GraphNode<T> : IMapNode<T>, IEnumerable<KeyValuePair<T, int>> where T : IEquatable<T>
     {
-
         /// <summary>
         /// 节点识别号<br/>Graph Node Id
         /// </summary>
@@ -39,6 +39,10 @@ namespace Meow.Math.Graph.Struct
         /// <param name="node">节点名<br/>Node Id</param>
         /// <returns>索引到的节点权重<br/>weight that The node linked</returns>
         public int this[T node] => Edges[node];
+        /// <summary>
+        /// 本节点的度<br/>Node's Degree.
+        /// </summary>
+        public int Degree => Edges.Count;
         public void Add(T node, int weight) => Edges.Add(node, weight);
         public bool Delete(T node) => Edges.Remove(node);
         public bool Exist(T node) => Edges.ContainsKey(node);

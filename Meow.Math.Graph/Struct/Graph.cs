@@ -375,5 +375,13 @@ namespace Meow.Math.Graph.Struct
             return collection;
         }
 
+        public void Prim_Tree(T start)
+        {
+
+        }
+        public void Kruskal_Tree(T start)
+        {
+
+        }
     }
 }
