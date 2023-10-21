@@ -13,6 +13,8 @@ namespace Meow.Math.Graph.Struct
     public class Node<NodeType> : IEnumerable<KeyValuePair<NodeType, int>>, IPlainNode<NodeType> where NodeType : IEquatable<NodeType>
     {
         /// <inheritdoc/>
+        private readonly object lockobj = new object();
+        /// <inheritdoc/>
         private Dictionary<NodeType, int> LinkedNode { get; } //内部维护连接表
         /// <summary>
         /// 节点识别号<br/>NodeId
@@ -28,25 +30,46 @@ namespace Meow.Math.Graph.Struct
             LinkedNode = new Dictionary<NodeType, int>();
         }
         /// <inheritdoc/>
-        public bool Exist(NodeType nodeId) => LinkedNode.ContainsKey(nodeId);
+        public bool Exist(NodeType nodeId)
+        {
+            lock (lockobj)
+            {
+                return LinkedNode.ContainsKey(nodeId);
+            }
+        }
         /// <inheritdoc/>
         public bool this[NodeType nodeId, int weight]
         {
             get
             {
-                if (!LinkedNode.ContainsKey(nodeId))
+                lock (lockobj)
                 {
-                    LinkedNode.Add(nodeId, weight);
-                    return true;
+                    if (!LinkedNode.ContainsKey(nodeId))
+                    {
+                        LinkedNode.Add(nodeId, weight);
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
             }
         }
         /// <inheritdoc/>
         public int this[NodeType nodeId]
         {
-            get => LinkedNode.TryGetValue(nodeId, out var weight) ? weight : throw new NodeNotExistException();
-            set => LinkedNode[nodeId] = LinkedNode.ContainsKey(nodeId) ? value : throw new NodeNotExistException();
+            get
+            {
+                lock (lockobj)
+                {
+                    return LinkedNode.TryGetValue(nodeId, out var weight) ? weight : throw new NodeNotExistException();
+                }
+            }
+            set
+            {
+                lock (lockobj)
+                {
+                    LinkedNode[nodeId] = LinkedNode.ContainsKey(nodeId) ? value : throw new NodeNotExistException();
+                }
+            }
         }
         /// <inheritdoc/>
         public IEnumerator<KeyValuePair<NodeType, int>> GetEnumerator() => LinkedNode.GetEnumerator();

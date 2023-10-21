@@ -27,7 +27,13 @@ namespace Meow.Math.Graph.Struct
                 return true;
             }
         }
-        public bool Exist(NodeType id) => NodeTable.ContainsKey(id);
+        public bool Exist(NodeType id)
+        {
+            lock (lockobj)
+            {
+                return NodeTable.ContainsKey(id);
+            }
+        }
         public bool Remove(NodeType id)
         {
             lock (lockobj)

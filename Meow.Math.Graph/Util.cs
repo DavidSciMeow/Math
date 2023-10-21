@@ -117,53 +117,6 @@ namespace Meow.Math.Graph.Util
             }
             return ms;
         }
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="seplines"></param>
-        ///// <returns></returns>
-        //public static Tree<string> ReadMappedTree(string[] seplines)
-        //{
-        //    Tree<string> tree = null;
-        //    bool _isRootDefine = false;
-        //    foreach (string line in seplines)
-        //    {
-        //        if (line.Contains('*'))
-        //        {
-        //            if (!_isRootDefine)
-        //            {
-        //                tree = new Tree<string>(line.Replace("*", ""));
-        //                _isRootDefine = true;
-        //            }
-        //            else
-        //            {
-        //                Console.WriteLine($"{line} err by only one tree root can be define");
-        //            }
-        //        }
-        //        else if (line.Contains('>'))
-        //        {
-        //            if (!_isRootDefine)
-        //            {
-        //                Console.WriteLine($"No Root Node Define. >skip");
-        //            }
-        //            else
-        //            {
-        //                var spl = line.Split('>');
-        //                var fn = spl[0];
-        //                var sn = spl[1];
-        //                if (!string.IsNullOrEmpty(fn) && !string.IsNullOrEmpty(sn) && tree is Tree<string> st)
-        //                {
-        //                    st.AddNode(sn, fn);
-        //                }
-        //                else
-        //                {
-        //                    Console.WriteLine($"{line} have no splitable node");
-        //                }
-        //            }
-        //        }
-        //    }
-        //    return tree;
-        //}
     }
 }
 
