@@ -1,5 +1,6 @@
 ﻿using Meow.Math.Graph.Struct;
 using System;
+using System.Collections.Generic;
 
 namespace Meow.Math.Graph.Interface
 {
@@ -9,6 +10,15 @@ namespace Meow.Math.Graph.Interface
     /// <typeparam name="NodeType">节点类型<br/>NodeType</typeparam>
     public interface IGraph<NodeType> : ISearchable<NodeType> where NodeType : IEquatable<NodeType>
     {
+        /// <summary>
+        /// 是否为无向图<br/> is Graph UnDirected or not
+        /// </summary>
+        bool UnDirected { get; }
+        /// <summary>
+        /// 是否为无权图<br/> is Graph UnWeighted or not
+        /// </summary>
+        bool UnWeighted { get; }
+
         /// <summary>
         /// 添加节点(根据节点名)<br/>Add Node (by Node Id)
         /// </summary>

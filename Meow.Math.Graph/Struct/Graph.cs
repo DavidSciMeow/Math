@@ -13,14 +13,14 @@ namespace Meow.Math.Graph.Struct
     /// <typeparam name="NodeType">节点类型<br/>NodeType</typeparam>
     public class Graph<NodeType> : IGraph<NodeType>, IGPathfinder<NodeType>, IMST<NodeType> where NodeType : IEquatable<NodeType>
     {
-        readonly object Olock = new object();
+        private readonly object lockobj = new object();
+        private IDictionary<NodeType, Node<NodeType>> NodeTable { get; } = new Dictionary<NodeType, Node<NodeType>>();
         public bool UnDirected { get; private set; } = false;
         public bool UnWeighted { get; private set; } = false;
-        public IDictionary<NodeType, Node<NodeType>> NodeTable { get; } = new Dictionary<NodeType, Node<NodeType>>();
 
         public bool Add(NodeType id)
         {
-            lock (Olock)
+            lock (lockobj)
             {
                 if (NodeTable.ContainsKey(id)) return false;
                 NodeTable.Add(id, new Node<NodeType>(id));
@@ -30,7 +30,7 @@ namespace Meow.Math.Graph.Struct
         public bool Exist(NodeType id) => NodeTable.ContainsKey(id);
         public bool Remove(NodeType id)
         {
-            lock (Olock)
+            lock (lockobj)
             {
                 if (!NodeTable.ContainsKey(id)) return false;
                 return NodeTable.Remove(id);
