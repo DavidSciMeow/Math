@@ -18,7 +18,6 @@ namespace Meow.Math.Graph.Interface
         /// 是否为无权图<br/> is Graph UnWeighted or not
         /// </summary>
         bool UnWeighted { get; }
-
         /// <summary>
         /// 添加节点(根据节点名)<br/>Add Node (by Node Id)
         /// </summary>

@@ -4,6 +4,7 @@ using Meow.Math.Graph.Struct.Comparer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 
 namespace Meow.Math.Graph.Struct
 {
@@ -18,6 +19,7 @@ namespace Meow.Math.Graph.Struct
         public bool UnDirected { get; private set; } = false;
         public bool UnWeighted { get; private set; } = false;
 
+        public Node<NodeType> this[NodeType id] => NodeTable.ContainsKey(id) ? NodeTable[id] : throw new NodeNotExistException();
         public bool Add(NodeType id)
         {
             lock (lockobj)
@@ -42,7 +44,6 @@ namespace Meow.Math.Graph.Struct
                 return NodeTable.Remove(id);
             }
         }
-        public Node<NodeType> this[NodeType id] => NodeTable.ContainsKey(id) ? NodeTable[id] : throw new NodeNotExistException();
         public bool Link(NodeType node1, NodeType node2, int weight = 1)
         {
             if (weight != 1) UnWeighted = true;
@@ -264,22 +265,60 @@ namespace Meow.Math.Graph.Struct
         }
         public NodeType[] FloydWarshall(NodeType start, NodeType end)
         {
-            Dictionary<KeyValuePair<NodeType, NodeType>, int> d = new Dictionary<KeyValuePair<NodeType, NodeType>, int>();
-            foreach(var k in NodeTable)
+            Dictionary<KeyValuePair<NodeType, NodeType>, Tuple<List<NodeType>, int>> Set = new Dictionary<KeyValuePair<NodeType, NodeType>, Tuple<List<NodeType>, int>>();
+            foreach (var i in NodeTable) //O(n) 全部节点遍历
             {
-                foreach (var i in NodeTable)
+                foreach (var j in i.Value) //O(j) 每个边
                 {
-                    foreach (var j in NodeTable)
-                    {
+                    Set.Add(
+                        new KeyValuePair<NodeType, NodeType>(i.Key, j.Key), 
+                        new Tuple<List<NodeType>, int>(
+                            new List<NodeType>() { i.Key, j.Key }, 
+                            j.Value
+                            )); //O(1)
+                }
+            }
 
+            foreach (var _k in NodeTable)
+            {
+                foreach (var _i in NodeTable)
+                {
+                    foreach (var _j in NodeTable)
+                    {
+                        var k = _k.Key;
+                        var i = _i.Key;
+                        var j = _j.Key;
+                        if(Exist(k) && this[i].Exist(k) && this[k].Exist(j) && (!i.Equals(j)) 
+                            && Set.ContainsKey(new KeyValuePair<NodeType, NodeType>(i, j))) //选点存在
+                        {
+                            var lik = Set[new KeyValuePair<NodeType, NodeType>(i, k)];
+                            var lkj = Set[new KeyValuePair<NodeType, NodeType>(k, j)];
+                            var lij = Set[new KeyValuePair<NodeType, NodeType>(i, j)];
+                            var dist = lik.Item2 + lkj.Item2;
+                            if (lij.Item2 > dist)
+                            {
+                                List<NodeType> path = new List<NodeType>();
+                                foreach (var ii in lik.Item1)
+                                {
+                                    if (!path.Contains(ii)) path.Add(ii);
+                                }
+                                foreach (var ii in lkj.Item1)
+                                {
+                                    if (!path.Contains(ii)) path.Add(ii);
+                                }
+                                Set.Remove(new KeyValuePair<NodeType, NodeType>(i, j));
+                                Set.Add(new KeyValuePair<NodeType, NodeType>(i, j), new Tuple<List<NodeType>, int>(path, dist));
+                            }
+                        }
                     }
                 }
             }
-            throw new NotImplementedException();
+
+            return Set[new KeyValuePair<NodeType, NodeType>(start, end)].Item1.ToArray();
         }
         public (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_BellmanFord(NodeType start)
         {
-            var (_, at) = BellmanFord_Map(start);
+            (Dictionary<NodeType, int> _, Dictionary<NodeType, NodeType> at) = BellmanFord_Map(start);
             Dictionary<NodeType, HashSet<NodeType>> tree = new Dictionary<NodeType, HashSet<NodeType>>();
             foreach (var i in at)
             {
@@ -296,7 +335,29 @@ namespace Meow.Math.Graph.Struct
         }
         public (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_Prim(NodeType start)
         {
-            throw new NotImplementedException();
+            Dictionary<NodeType, HashSet<NodeType>> tree = new Dictionary<NodeType, HashSet<NodeType>>();
+
+            foreach (var i in NodeTable) //O(n) 全部节点遍历
+            {
+                tree.Add(i.Key, new HashSet<NodeType>());
+                var vk = int.MaxValue;
+                var _vk = i.Key;
+                foreach (var j in i.Value) //O(j) 每个边
+                {
+                    if (j.Value < vk)
+                    {
+                        vk = j.Value;
+                        _vk = j.Key;
+                    }
+                }
+
+                if(!_vk.Equals(i.Key))
+                {
+                    tree[i.Key].Add(_vk);
+                }
+            }
+
+            return (tree, start);
         }
         public (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_Kruskal(NodeType start)
         {

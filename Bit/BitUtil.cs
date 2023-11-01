@@ -1,4 +1,6 @@
-﻿namespace Meow.Math
+﻿using System;
+
+namespace Meow.Math.Bin
 {
     /// <summary>
     /// 比特工具类
