@@ -1,10 +1,11 @@
-﻿using Meow.Math.Graph.ErrorList;
+﻿using Graph.Interface;
+using Meow.Math.Graph.ErrorList;
 using Meow.Math.Graph.Interface;
 using Meow.Math.Graph.Struct.Comparer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
+using System.Runtime.CompilerServices;
 
 namespace Meow.Math.Graph.Struct
 {
@@ -234,8 +235,16 @@ namespace Meow.Math.Graph.Struct
                 {
                     if (dist[u] != int.MaxValue && dist[u] + w < dist[v])
                     {
-                        ppath.Add(v, (v, u, w));
-                        dist[v] = dist[u] + w;
+                        if (ppath.ContainsKey(v))
+                        {
+                            ppath[v] = (v, u, w);
+                            dist[v] = dist[u] + w;
+                        }
+                        else
+                        {
+                            ppath.Add(v, (v, u, w));
+                            dist[v] = dist[u] + w;
+                        }
                     }
                 }
             }
@@ -265,56 +274,7 @@ namespace Meow.Math.Graph.Struct
         }
         public NodeType[] FloydWarshall(NodeType start, NodeType end)
         {
-            Dictionary<KeyValuePair<NodeType, NodeType>, Tuple<List<NodeType>, int>> Set = new Dictionary<KeyValuePair<NodeType, NodeType>, Tuple<List<NodeType>, int>>();
-            foreach (var i in NodeTable) //O(n) 全部节点遍历
-            {
-                foreach (var j in i.Value) //O(j) 每个边
-                {
-                    Set.Add(
-                        new KeyValuePair<NodeType, NodeType>(i.Key, j.Key), 
-                        new Tuple<List<NodeType>, int>(
-                            new List<NodeType>() { i.Key, j.Key }, 
-                            j.Value
-                            )); //O(1)
-                }
-            }
-
-            foreach (var _k in NodeTable)
-            {
-                foreach (var _i in NodeTable)
-                {
-                    foreach (var _j in NodeTable)
-                    {
-                        var k = _k.Key;
-                        var i = _i.Key;
-                        var j = _j.Key;
-                        if(Exist(k) && this[i].Exist(k) && this[k].Exist(j) && (!i.Equals(j)) 
-                            && Set.ContainsKey(new KeyValuePair<NodeType, NodeType>(i, j))) //选点存在
-                        {
-                            var lik = Set[new KeyValuePair<NodeType, NodeType>(i, k)];
-                            var lkj = Set[new KeyValuePair<NodeType, NodeType>(k, j)];
-                            var lij = Set[new KeyValuePair<NodeType, NodeType>(i, j)];
-                            var dist = lik.Item2 + lkj.Item2;
-                            if (lij.Item2 > dist)
-                            {
-                                List<NodeType> path = new List<NodeType>();
-                                foreach (var ii in lik.Item1)
-                                {
-                                    if (!path.Contains(ii)) path.Add(ii);
-                                }
-                                foreach (var ii in lkj.Item1)
-                                {
-                                    if (!path.Contains(ii)) path.Add(ii);
-                                }
-                                Set.Remove(new KeyValuePair<NodeType, NodeType>(i, j));
-                                Set.Add(new KeyValuePair<NodeType, NodeType>(i, j), new Tuple<List<NodeType>, int>(path, dist));
-                            }
-                        }
-                    }
-                }
-            }
-
-            return Set[new KeyValuePair<NodeType, NodeType>(start, end)].Item1.ToArray();
+            throw new NotImplementedException();
         }
         public (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_BellmanFord(NodeType start)
         {
@@ -336,78 +296,38 @@ namespace Meow.Math.Graph.Struct
         public (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_Prim(NodeType start)
         {
             Dictionary<NodeType, HashSet<NodeType>> tree = new Dictionary<NodeType, HashSet<NodeType>>();
-
-            foreach (var i in NodeTable) //O(n) 全部节点遍历
+            HashSet<NodeType> _v = new HashSet<NodeType>() { start };
+            while (_v.Count < NodeTable.Count)
             {
-                tree.Add(i.Key, new HashSet<NodeType>());
-                var vk = int.MaxValue;
-                var _vk = i.Key;
-                foreach (var j in i.Value) //O(j) 每个边
+                var (parent, tempmin, w) = (default(NodeType), default(NodeType), int.MaxValue);
+                foreach (var i in _v)//所有访问过的点
                 {
-                    if (j.Value < vk)
+                    foreach(var j in this[i])//里面的所有连接点
                     {
-                        vk = j.Value;
-                        _vk = j.Key;
+                        if (!_v.Contains(j.Key) && j.Value < w)//未被访问过 且 权重小
+                        {
+                            w = j.Value;
+                            tempmin = j.Key;
+                            parent = i;
+                        }
                     }
                 }
-
-                if(!_vk.Equals(i.Key))
+                if (!parent.Equals(default) && !tempmin.Equals(default)) _v.Add(tempmin);//已选定
+                if (tree.ContainsKey(parent))
                 {
-                    tree[i.Key].Add(_vk);
+                    tree[parent].Add(tempmin);
+                }
+                else
+                {
+                    tree.Add(parent, new HashSet<NodeType> { tempmin });
                 }
             }
-
             return (tree, start);
         }
         public (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_Kruskal(NodeType start)
         {
+            Dictionary<NodeType, HashSet<NodeType>> tree = new Dictionary<NodeType, HashSet<NodeType>>();
             throw new NotImplementedException();
         }
-    }
-
-
-    /// <summary>
-    /// 最小生成树接口<br/>Minimum Spanning Tree Algorithm
-    /// </summary>
-    /// <typeparam name="NodeType">节点类型<br/>NodeType</typeparam>
-    public interface IMST<NodeType>
-    {
-        (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_Prim(NodeType start);
-        (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_Kruskal(NodeType start);
-        /// <summary>
-        /// 以 <b>贝尔曼福德算法</b> 为最短路径基准生成最小生成树 <br/> Use <i><b>Bellman-Ford Algorithm</b></i> to create a Minimum Spanning Tree
-        /// <para>
-        /// 时间复杂度(Time Complexity) :: <i><b><see langword="σ(3n^2-n) ~ O(3n*j*(n-1))" /></b></i><br/>
-        /// </para>
-        /// </summary>
-        /// <param name="start">起始节点(根节点)<br/>Start Node In Graph (Root Node of tree)</param>
-        /// <returns>一个最小生成树<br/>Minimum Spanning Tree</returns>
-        (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_BellmanFord(NodeType start);
-    }
-    public interface IMatrixPathfinder<NodeType> : IGPathfinder<NodeType>
-    {
-        NodeType[] AStar(NodeType start, NodeType end);
-    }
-    public interface IRandomWalk<NodeType> : IGPathfinder<NodeType>
-    {
-        NodeType[] RandomWalk(NodeType start);
-    }
-    public interface ICentralityDetection
-    {
-        void DegreeCentrality();
-        void DegreeAverage();
-        void DegreeDistribution();
-        void DegreeWeightedCentrality();
-        void ClosenessCentrality();
-        void HarmonicCentrality();
-        void BetweennessCentrality();
-        void PageRank();
-    }
-    public interface ICommunityDetection
-    {
-        void Measuring_TriangleCount();
-        void Measuring_ClusteringCoefficient();
-        void Component_StronglyConnect();
-        void Component_Connect();
     }
 }

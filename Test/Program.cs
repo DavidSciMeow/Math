@@ -1,11 +1,9 @@
 ﻿using Meow.Math.Graph.Struct;
 using Meow.Math.Graph.Util;
 using System.Buffers;
+using System.Collections;
 using System.Runtime.InteropServices;
 
-//DateTime start = DateTime.Now;
-//double usedMemory1 = Process.GetCurrentProcess().WorkingSet64 / 1024.0 / 1024.0;
-//{
 string s = "" +
         "n1-n6:3\n" +
         "n6-n5:6\n" +
@@ -20,12 +18,23 @@ string s = "" +
         "n7-n8:1\n" +
         "";
 
-Graph<string> g = Util.ReadMap(s.Split("\n"));
-var i = g.MST_Prim("n1");
+ArrayList x1 = ["a","b","c"];
+List<string> x2 = ["a","b","c"];
+HashSet<string> x3 = ["a","b","c"];
+ArrayList x4 = [.. x1, .. x2];
 
-Console.WriteLine(Util.PrintTree(i.Root,i.Table));
-//}
-//double usedMemory2 = Process.GetCurrentProcess().WorkingSet64 / 1024.0 / 1024.0;
-//DateTime end = DateTime.Now;
-//Console.WriteLine("----------");
-//Console.WriteLine($"{(end - start).TotalMilliseconds} ms / {usedMemory2 - usedMemory1} MB");
+
+Graph<string> g = Util.ReadMap(s.Split("\n"));
+
+//Console.WriteLine(g.DFS("n1").QuickPrint());
+//Console.WriteLine(g.BFS("n1").QuickPrint());
+//Console.WriteLine(g.Dijkstra("n1", "n5").QuickPrint());
+//Console.WriteLine(g.BellmanFord("n1", "n5").QuickPrint());
+//Console.WriteLine(g.FloydWarshall("n1", "n5").QuickPrint());
+//Console.WriteLine(g.MST_BellmanFord("n1").TreePrint());
+//Console.WriteLine(g.MST_Prim("n1").TreePrint());
+Console.WriteLine(g.MST_Kruskal("n1").TreePrint());
+
+
+//var i = g.MST_Prim("n1");
+//Console.WriteLine(Util.PrintTree(i.Root, i.Table));

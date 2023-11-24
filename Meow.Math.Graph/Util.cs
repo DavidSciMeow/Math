@@ -8,10 +8,11 @@ namespace Meow.Math.Graph.Util
 {
     public static class Util
     {
-        public static string PrintTree<NodeType>(NodeType Root, Dictionary<NodeType, HashSet<NodeType>> Table)
+        public static string TreePrint<NodeType>(this (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) treeStruct) => TreePrint(treeStruct.Table, treeStruct.Root);
+        public static string TreePrint<NodeType>(Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root)
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine($"Root:{Root} | NodeNum:{Table.Count}");
+            sb.AppendLine($"Root:{Root}");
             HashSet<NodeType> visited = new HashSet<NodeType>() { Root };//首元素访问标记
             Stack<NodeType> ss = new Stack<NodeType>();
             ss.Push(Root);//搜索元素入栈
@@ -116,6 +117,12 @@ namespace Meow.Math.Graph.Util
                 }
             }
             return ms;
+        }
+        public static string QuickPrint<NodeType>(this NodeType[] nodes)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var x in nodes) sb.Append($"[{x}] ");
+            return sb.ToString();
         }
     }
 }
