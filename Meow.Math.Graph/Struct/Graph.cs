@@ -5,7 +5,6 @@ using Meow.Math.Graph.Struct.Comparer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Meow.Math.Graph.Struct
 {
@@ -13,14 +12,18 @@ namespace Meow.Math.Graph.Struct
     /// 一般图<br/>General Graph
     /// </summary>
     /// <typeparam name="NodeType">节点类型<br/>NodeType</typeparam>
-    public class Graph<NodeType> : IGraph<NodeType>, IGPathfinder<NodeType>, IMST<NodeType> where NodeType : IEquatable<NodeType>
+    public partial class Graph<NodeType> : IGraph<NodeType>, IGPathfinder<NodeType>, IMST<NodeType> where NodeType : IEquatable<NodeType>
     {
         private readonly object lockobj = new object();
         private IDictionary<NodeType, Node<NodeType>> NodeTable { get; } = new Dictionary<NodeType, Node<NodeType>>();
+        /// <inheritdoc/>
         public bool UnDirected { get; private set; } = false;
+        /// <inheritdoc/>
         public bool UnWeighted { get; private set; } = false;
 
+        /// <inheritdoc/>
         public Node<NodeType> this[NodeType id] => NodeTable.ContainsKey(id) ? NodeTable[id] : throw new NodeNotExistException();
+        /// <inheritdoc/>
         public bool Add(NodeType id)
         {
             lock (lockobj)
@@ -30,6 +33,7 @@ namespace Meow.Math.Graph.Struct
                 return true;
             }
         }
+        /// <inheritdoc/>
         public bool Exist(NodeType id)
         {
             lock (lockobj)
@@ -37,6 +41,7 @@ namespace Meow.Math.Graph.Struct
                 return NodeTable.ContainsKey(id);
             }
         }
+        /// <inheritdoc/>
         public bool Remove(NodeType id)
         {
             lock (lockobj)
@@ -45,17 +50,20 @@ namespace Meow.Math.Graph.Struct
                 return NodeTable.Remove(id);
             }
         }
+        /// <inheritdoc/>
         public bool Link(NodeType node1, NodeType node2, int weight = 1)
         {
             if (weight != 1) UnWeighted = true;
             return this[node1][node2, weight] && this[node2][node1, weight];
         }
+        /// <inheritdoc/>
         public bool LinkTo(NodeType node1, NodeType node2, int weight = 1)
         {
             if (weight != 1) UnWeighted = true;
             UnDirected = true;
             return this[node1][node2, weight];
         }
+        /// <inheritdoc/>
         public int PathWeight(NodeType[] nodelist)
         {
             int totalWeight = 0;
@@ -78,6 +86,7 @@ namespace Meow.Math.Graph.Struct
             return totalWeight;
         }
 
+        /// <inheritdoc/>
         public NodeType[] BFS(NodeType start)
         {
             if (!(start is NodeType) || !NodeTable.ContainsKey(start)) throw new NodeNotExistException();
@@ -97,6 +106,7 @@ namespace Meow.Math.Graph.Struct
             }
             return path.ToArray();
         }
+        /// <inheritdoc/>
         public NodeType[] DFS(NodeType start)
         {
             if (!(start is NodeType) || !NodeTable.ContainsKey(start)) throw new NodeNotExistException();
@@ -122,6 +132,7 @@ namespace Meow.Math.Graph.Struct
             }
             return path.ToArray();
         }
+        /// <inheritdoc/>
         public NodeType[] Dijkstra(NodeType start, NodeType end)
         {
             if (!NodeTable.ContainsKey(start) || !NodeTable.ContainsKey(end)) throw new NodeNotExistException();//不存在这两个节点
@@ -163,6 +174,7 @@ namespace Meow.Math.Graph.Struct
                 throw new NodeUnreachableException();//节点全遍历后不可达
             }
         }
+        /// <inheritdoc/>
         public (Dictionary<NodeType, int> Dist, Dictionary<NodeType, NodeType> AdjacencyTable) BellmanFord_Map(NodeType start)
         {
             HashSet<Tuple<NodeType, NodeType, int, bool>> Set = new HashSet<Tuple<NodeType, NodeType, int, bool>>(new GeneralEdgeEqualityComparer<NodeType>());
@@ -198,6 +210,7 @@ namespace Meow.Math.Graph.Struct
             }
             return (dist, path);
         }
+        /// <inheritdoc/>
         public Tuple<NodeType, NodeType, int>[] BellmanFord_NWCDetector(Dictionary<NodeType, int> Dist)
         {
             HashSet<Tuple<NodeType, NodeType, int, bool>> Set = new HashSet<Tuple<NodeType, NodeType, int, bool>>(new GeneralEdgeEqualityComparer<NodeType>());
@@ -212,6 +225,7 @@ namespace Meow.Math.Graph.Struct
             foreach (var (u, v, w, _) in Set) if (Dist[u] != int.MaxValue && Dist[u] + w < Dist[v]) collection.Add(new Tuple<NodeType, NodeType, int>(u, v, w));
             return collection.ToArray();
         }
+        /// <inheritdoc/>
         public NodeType[] BellmanFord(NodeType start, NodeType end)
         {
             HashSet<Tuple<NodeType, NodeType, int, bool>> Set = new HashSet<Tuple<NodeType, NodeType, int, bool>>(new GeneralEdgeEqualityComparer<NodeType>());
@@ -248,7 +262,7 @@ namespace Meow.Math.Graph.Struct
                     }
                 }
             }
-            
+
 
             foreach (var (u, v, w, _) in Set) //负权环检测 O(n)
             {
@@ -272,11 +286,77 @@ namespace Meow.Math.Graph.Struct
             }
             return path.ToArray();
         }
+        /// <inheritdoc/>
+        public (Dictionary<KeyValuePair<NodeType, NodeType>, NodeType> mPr, Dictionary<KeyValuePair<NodeType, NodeType>, int> mU) FloydWarshall_Map()
+        {
+            Dictionary<KeyValuePair<NodeType, NodeType>, int> mU = new Dictionary<KeyValuePair<NodeType, NodeType>, int>();
+            Dictionary<KeyValuePair<NodeType, NodeType>, NodeType> mPr = new Dictionary<KeyValuePair<NodeType, NodeType>, NodeType>();
+
+            foreach (var i in NodeTable.Values)
+            {
+                foreach (var j in NodeTable.Keys)
+                {
+                    mU.Add(new KeyValuePair<NodeType, NodeType>(i.Id, j), i.Exist(j) ? i[j] : int.MaxValue);
+                }
+            }
+            //构成矩阵集合
+            foreach (var k in NodeTable.Keys)
+            {
+                foreach (var i in NodeTable.Keys)
+                {
+                    foreach (var j in NodeTable.Keys)
+                    {
+                        if (!i.Equals(j) &&
+                            mU[new KeyValuePair<NodeType, NodeType>(i, k)] != int.MaxValue &&
+                            mU[new KeyValuePair<NodeType, NodeType>(k, j)] != int.MaxValue &&
+                            mU[new KeyValuePair<NodeType, NodeType>(i, j)] >= mU[new KeyValuePair<NodeType, NodeType>(i, k)] + mU[new KeyValuePair<NodeType, NodeType>(k, j)])
+                        {
+                            mU[new KeyValuePair<NodeType, NodeType>(i, j)] = mU[new KeyValuePair<NodeType, NodeType>(i, k)] + mU[new KeyValuePair<NodeType, NodeType>(k, j)];
+
+                            if (mPr.ContainsKey(new KeyValuePair<NodeType, NodeType>(i, j)))
+                            {
+                                mPr[new KeyValuePair<NodeType, NodeType>(i, j)] = k;
+                            }
+                            else
+                            {
+                                mPr.Add(new KeyValuePair<NodeType, NodeType>(i, j), k);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return (mPr, mU);
+        }
+        /// <inheritdoc/>
         public NodeType[] FloydWarshall(NodeType start, NodeType end)
         {
-            throw new NotImplementedException();
+            var (midpoint, matrix) = FloydWarshall_Map();
+            Stack<NodeType> lst = new Stack<NodeType>();
+            lst.Push(end);
+            var mid = end;
+
+            while (true)
+            {
+                if (midpoint.ContainsKey(new KeyValuePair<NodeType, NodeType>(start, mid)))
+                {
+                    var k = midpoint[new KeyValuePair<NodeType, NodeType>(start, mid)];
+                    lst.Push(k);
+                    mid = k;
+                    if (!this[start].Exist(k)) continue;
+                    lst.Push(start);
+                    break;
+                }
+                else
+                {
+                    throw new NodeUnreachableException();
+                }
+            }
+
+            return lst.ToArray();
         }
-        public (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_BellmanFord(NodeType start)
+        /// <inheritdoc/>
+        public (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) GSMST_BellmanFord(NodeType start)
         {
             (Dictionary<NodeType, int> _, Dictionary<NodeType, NodeType> at) = BellmanFord_Map(start);
             Dictionary<NodeType, HashSet<NodeType>> tree = new Dictionary<NodeType, HashSet<NodeType>>();
@@ -293,6 +373,7 @@ namespace Meow.Math.Graph.Struct
             }
             return (tree, start);
         }
+        /// <inheritdoc/>
         public (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_Prim(NodeType start)
         {
             Dictionary<NodeType, HashSet<NodeType>> tree = new Dictionary<NodeType, HashSet<NodeType>>();
@@ -302,7 +383,7 @@ namespace Meow.Math.Graph.Struct
                 var (parent, tempmin, w) = (default(NodeType), default(NodeType), int.MaxValue);
                 foreach (var i in _v)//所有访问过的点
                 {
-                    foreach(var j in this[i])//里面的所有连接点
+                    foreach (var j in this[i])//里面的所有连接点
                     {
                         if (!_v.Contains(j.Key) && j.Value < w)//未被访问过 且 权重小
                         {
@@ -324,10 +405,55 @@ namespace Meow.Math.Graph.Struct
             }
             return (tree, start);
         }
+        /// <inheritdoc/>
         public (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_Kruskal(NodeType start)
         {
+            //构成边集合
+            HashSet<Tuple<NodeType, NodeType, int, bool>> hs = new HashSet<Tuple<NodeType, NodeType, int, bool>>(new GeneralEdgeEqualityComparer<NodeType>());
+            foreach (var i in NodeTable)
+            {
+                foreach (var j in i.Value)
+                {
+                    if (this[i.Key][j.Key] == this[j.Key][i.Key])
+                    {
+                        hs.Add(new Tuple<NodeType, NodeType, int, bool>(i.Key, j.Key, this[i.Key][j.Key], true));
+                    }
+                    else
+                    {
+                        hs.Add(new Tuple<NodeType, NodeType, int, bool>(i.Key, j.Key, this[i.Key][j.Key], false));
+                        hs.Add(new Tuple<NodeType, NodeType, int, bool>(j.Key, i.Key, this[j.Key][i.Key], false));
+                    }
+                }
+            }
+
+            //边排序
+            var _o = hs.OrderBy(a => a.Item3);
+
+            //选边阶段
+            foreach (var i in _o)
+            {
+                //成环测试
+            }
+
+            //形成树
             Dictionary<NodeType, HashSet<NodeType>> tree = new Dictionary<NodeType, HashSet<NodeType>>();
-            throw new NotImplementedException();
+            foreach (var i in hs)
+            {
+                var u = i.Item1;
+                var v = i.Item2;
+                var w = i.Item3;
+
+                if (tree.ContainsKey(u))
+                {
+                    tree[u].Add(v);
+                }
+                else
+                {
+                    tree.Add(u, new HashSet<NodeType> { v });
+                }
+            }
+                
+            return (tree, start);
         }
     }
 }

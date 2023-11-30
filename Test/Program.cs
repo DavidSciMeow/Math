@@ -1,40 +1,38 @@
 ﻿using Meow.Math.Graph.Struct;
 using Meow.Math.Graph.Util;
-using System.Buffers;
-using System.Collections;
-using System.Runtime.InteropServices;
 
 string s = "" +
-        "n1-n6:3\n" +
-        "n6-n5:6\n" +
-        "n5-n4:11\n" +
-        "n6-n7:4\n" +
-        "n5-n7:12\n" +
-        "n2-n1:6\n" +
-        "n1-n8:7\n" +
-        "n2-n8:2\n" +
-        "n3-n8:4\n" +
-        "n4-n8:7\n" +
-        "n7-n8:1\n" +
-        "";
-
-ArrayList x1 = ["a","b","c"];
-List<string> x2 = ["a","b","c"];
-HashSet<string> x3 = ["a","b","c"];
-ArrayList x4 = [.. x1, .. x2];
-
+    "A-D:2\n" +
+    "A-B:1\n" +
+    "D-B:4\n" +
+    "D-C:7\n" +
+    "D-E:10\n" +
+    "B-C:3\n" +
+    "B-F:7\n" +
+    "C-F:5\n" +
+    "C-E:6\n" +
+    "E-F:7\n" +
+    "F-G:12\n" +
+    "";
 
 Graph<string> g = Util.ReadMap(s.Split("\n"));
 
-//Console.WriteLine(g.DFS("n1").QuickPrint());
-//Console.WriteLine(g.BFS("n1").QuickPrint());
-//Console.WriteLine(g.Dijkstra("n1", "n5").QuickPrint());
-//Console.WriteLine(g.BellmanFord("n1", "n5").QuickPrint());
-//Console.WriteLine(g.FloydWarshall("n1", "n5").QuickPrint());
-//Console.WriteLine(g.MST_BellmanFord("n1").TreePrint());
-//Console.WriteLine(g.MST_Prim("n1").TreePrint());
-Console.WriteLine(g.MST_Kruskal("n1").TreePrint());
+var start = "A";
+var end = "E";
 
+Console.WriteLine(g.DFS(start).QuickPrint());
+Console.WriteLine(g.BFS(start).QuickPrint());
+Console.WriteLine(g.Dijkstra(start, end).QuickPrint());
+Console.WriteLine(g.BellmanFord(start, end).QuickPrint());
+Console.WriteLine(g.FloydWarshall(start, end).QuickPrint());
 
-//var i = g.MST_Prim("n1");
-//Console.WriteLine(Util.PrintTree(i.Root, i.Table));
+Console.WriteLine(g.GSMST_BellmanFord(start).TreePrint());
+Console.WriteLine(g.MST_Prim(start).TreePrint());
+Console.WriteLine(g.MST_Kruskal(start).TreePrint());
+
+//g.RingTrackList(start);
+//foreach (var i in q)
+//{
+//    foreach(var j in i) Console.Write($" [{j}] ");
+//    Console.WriteLine();
+//}

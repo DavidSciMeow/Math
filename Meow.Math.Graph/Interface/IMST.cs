@@ -11,7 +11,7 @@ namespace Graph.Interface
         /// <summary>
         /// 以 <b>普利姆</b> 为最短路径基准生成最小生成树 <br/> Use <i><b>Prim Algorithm</b></i> to create a Minimum Spanning Tree
         /// <para>
-        /// 时间复杂度(Time Complexity) :: <i><b><see langword="*" /></b></i><br/>
+        /// 时间复杂度(Time Complexity) :: <i><b><see langword="O(n log n) ~ O(n^2)" /></b></i><br/>
         /// </para>
         /// </summary>
         /// <param name="start">起始节点(根节点)<br/>Start Node In Graph (Root Node of tree)</param>
@@ -27,13 +27,13 @@ namespace Graph.Interface
         /// <returns>一个最小生成树<br/>Minimum Spanning Tree</returns>
         (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_Kruskal(NodeType start);
         /// <summary>
-        /// 以 <b>贝尔曼福德算法</b> 为最短路径基准生成最小生成树 <br/> Use <i><b>Bellman-Ford Algorithm</b></i> to create a Minimum Spanning Tree
+        /// 以 <b>贝尔曼福德算法</b> 为最短路径基准生成<b>同源</b>最小生成树 <br/> Use <i><b>Bellman-Ford Algorithm</b></i> to create a <b>(General Source)</b> Minimum Spanning Tree
         /// <para>
         /// 时间复杂度(Time Complexity) :: <i><b><see langword="σ(3n^2-n) ~ O(3n*j*(n-1))" /></b></i><br/>
         /// </para>
         /// </summary>
         /// <param name="start">起始节点(根节点)<br/>Start Node In Graph (Root Node of tree)</param>
         /// <returns>一个最小生成树<br/>Minimum Spanning Tree</returns>
-        (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) MST_BellmanFord(NodeType start);
+        (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) GSMST_BellmanFord(NodeType start);
     }
 }
