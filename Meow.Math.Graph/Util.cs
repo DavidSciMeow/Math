@@ -6,9 +6,25 @@ using System.Text;
 
 namespace Meow.Math.Graph.Util
 {
+    /// <summary>
+    /// 图生成库工具
+    /// </summary>
     public static class Util
     {
+        /// <summary>
+        /// 打印树
+        /// </summary>
+        /// <typeparam name="NodeType">节点类型</typeparam>
+        /// <param name="treeStruct">树结构</param>
+        /// <returns></returns>
         public static string TreePrint<NodeType>(this (Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root) treeStruct) => TreePrint(treeStruct.Table, treeStruct.Root);
+        /// <summary>
+        /// 打印树
+        /// </summary>
+        /// <typeparam name="NodeType">节点类型</typeparam>
+        /// <param name="Table">邻接表</param>
+        /// <param name="Root">根</param>
+        /// <returns></returns>
         public static string TreePrint<NodeType>(Dictionary<NodeType, HashSet<NodeType>> Table, NodeType Root)
         {
             StringBuilder sb = new StringBuilder();
@@ -50,6 +66,11 @@ namespace Meow.Math.Graph.Util
             }
             return sb.ToString();
         }
+        /// <summary>
+        /// 从字符串数组读取图
+        /// </summary>
+        /// <param name="seplines"></param>
+        /// <returns></returns>
         public static Graph<string> ReadMap(string[] seplines)
         {
             Graph<string> ms = new Graph<string>();
@@ -118,6 +139,12 @@ namespace Meow.Math.Graph.Util
             }
             return ms;
         }
+        /// <summary>
+        /// 快速打印节点链
+        /// </summary>
+        /// <typeparam name="NodeType">节点类型</typeparam>
+        /// <param name="nodes">节点列</param>
+        /// <returns></returns>
         public static string QuickPrint<NodeType>(this NodeType[] nodes)
         {
             StringBuilder sb = new StringBuilder();

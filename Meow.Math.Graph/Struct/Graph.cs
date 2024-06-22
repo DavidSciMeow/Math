@@ -5,6 +5,7 @@ using Meow.Math.Graph.Struct.Comparer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace Meow.Math.Graph.Struct
 {
@@ -15,7 +16,8 @@ namespace Meow.Math.Graph.Struct
     public partial class Graph<NodeType> : IGraph<NodeType>, IGPathfinder<NodeType>, IMST<NodeType> where NodeType : IEquatable<NodeType>
     {
         private readonly object lockobj = new object();
-        private IDictionary<NodeType, Node<NodeType>> NodeTable { get; } = new Dictionary<NodeType, Node<NodeType>>();
+        /// <inheritdoc/>
+        public IDictionary<NodeType, Node<NodeType>> NodeTable { get; } = new Dictionary<NodeType, Node<NodeType>>();
         /// <inheritdoc/>
         public bool UnDirected { get; private set; } = false;
         /// <inheritdoc/>
@@ -432,7 +434,8 @@ namespace Meow.Math.Graph.Struct
             //选边阶段
             foreach (var i in _o)
             {
-                //成环测试
+                //检测一个边是否会形成环
+
             }
 
             //形成树
@@ -454,6 +457,57 @@ namespace Meow.Math.Graph.Struct
             }
                 
             return (tree, start);
+        }
+        /// <inheritdoc/>
+        public List<NodeType[]> GetAllPathsInGraph()
+        {
+            List<NodeType[]> allPaths = new List<NodeType[]>();
+
+            foreach (var startNode in NodeTable.Keys)
+            {
+                foreach (var endNode in NodeTable.Keys)
+                {
+                    if (!startNode.Equals(endNode))
+                    {
+                        List<NodeType[]> pathsFromStartToEnd = GetAllPathsFromStartToEnd(startNode, endNode);
+                        allPaths.AddRange(pathsFromStartToEnd);
+                    }
+                }
+            }
+            return allPaths;
+        }
+        /// <inheritdoc/>
+        public List<NodeType[]> GetAllPathsFromStartToEnd(NodeType startNode, NodeType endNode)
+        {
+            List<NodeType[]> paths = new List<NodeType[]>();
+            Stack<Tuple<NodeType, List<NodeType>>> stack = new Stack<Tuple<NodeType, List<NodeType>>>();
+
+            stack.Push(new Tuple<NodeType, List<NodeType>>(startNode, new List<NodeType> { startNode }));
+
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+                NodeType currentNode = current.Item1;
+                List<NodeType> currentPath = current.Item2;
+
+                if (currentNode.Equals(endNode))
+                {
+                    paths.Add(currentPath.ToArray());
+                }
+                else
+                {
+                    foreach (var neighbor in NodeTable[currentNode])
+                    {
+                        if (!currentPath.Contains(neighbor.Key))
+                        {
+                            List<NodeType> newPath = new List<NodeType>(currentPath) { neighbor.Key };
+                            stack.Push(new Tuple<NodeType, List<NodeType>>(neighbor.Key, newPath));
+                        }
+                    }
+                }
+            }
+
+            return paths;
         }
     }
 }
