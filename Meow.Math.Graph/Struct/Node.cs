@@ -21,6 +21,11 @@ namespace Meow.Math.Graph.Struct
         /// </summary>
         public NodeType Id { get; }
         /// <summary>
+        /// 父节点<br/>Parent Node (for tree)
+        /// </summary>
+        public Node<NodeType> Parent { get; private set; }
+
+        /// <summary>
         /// 初始化一个一般节点<br/>Init a Node
         /// </summary>
         /// <param name="id">节点识别号<br/>NodeId</param>
@@ -29,6 +34,7 @@ namespace Meow.Math.Graph.Struct
             Id = id;
             LinkedNode = new Dictionary<NodeType, int>();
         }
+
         /// <inheritdoc/>
         public bool Exist(NodeType nodeId)
         {
@@ -37,22 +43,7 @@ namespace Meow.Math.Graph.Struct
                 return LinkedNode.ContainsKey(nodeId);
             }
         }
-        /// <inheritdoc/>
-        public bool this[NodeType nodeId, int weight]
-        {
-            get
-            {
-                lock (lockobj)
-                {
-                    if (!LinkedNode.ContainsKey(nodeId))
-                    {
-                        LinkedNode.Add(nodeId, weight);
-                        return true;
-                    }
-                    return false;
-                }
-            }
-        }
+
         /// <inheritdoc/>
         public int this[NodeType nodeId]
         {
@@ -71,6 +62,45 @@ namespace Meow.Math.Graph.Struct
                 }
             }
         }
+
+        /// <summary>
+        /// 添加邻居节点<br/>Add Neighbor Node
+        /// </summary>
+        /// <param name="neighbor">邻居节点<br/>Neighbor Node</param>
+        /// <param name="weight">边权重<br/>Edge Weight</param>
+        public bool AddNeighbor(Node<NodeType> neighbor, int weight)
+        {
+            lock (lockobj)
+            {
+                if (!LinkedNode.ContainsKey(neighbor.Id))
+                {
+                    LinkedNode.Add(neighbor.Id, weight);
+                    return true;
+                }
+                return false;
+            }
+        }
+        /// <summary>
+        /// 添加邻居节点<br/>Add Neighbor Node
+        /// </summary>
+        /// <param name="nodeId">邻居节点<br/>Neighbor Node</param>
+        /// <param name="weight">边权重<br/>Edge Weight</param>
+        public bool AddNeighbor(NodeType nodeId, int weight)
+        {
+            lock (lockobj)
+            {
+                lock (lockobj)
+                {
+                    if (!LinkedNode.ContainsKey(nodeId))
+                    {
+                        LinkedNode.Add(nodeId, weight);
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        }
+
         /// <inheritdoc/>
         public IEnumerator<KeyValuePair<NodeType, int>> GetEnumerator() => LinkedNode.GetEnumerator();
         /// <inheritdoc/>
