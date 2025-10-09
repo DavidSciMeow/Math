@@ -1,0 +1,240 @@
+[
+  {
+    "Name": "UndirectedWeighted_MST",
+    "Text": "1--2:1\n1--3:4\n2--3:2\n2--4:6\n3--4:3\n3--5:5\n4--5:7",
+    "ExpectedNodeCount": 5,
+    "ExpectedEdgeCount": 7,
+    "ExpectedDirected": false,
+    "ExpectedMstTotalWeight": 11,
+    "ExpectedMaxFlow": null,
+    "ExpectedDistances": [
+      { "From": "1", "To": "1", "Distance": 0 },
+      { "From": "1", "To": "2", "Distance": 1 },
+      { "From": "1", "To": "3", "Distance": 3 },
+      { "From": "1", "To": "4", "Distance": 6 },
+      { "From": "1", "To": "5", "Distance": 8 },
+
+      { "From": "2", "To": "1", "Distance": 1 },
+      { "From": "2", "To": "2", "Distance": 0 },
+      { "From": "2", "To": "3", "Distance": 2 },
+      { "From": "2", "To": "4", "Distance": 5 },
+      { "From": "2", "To": "5", "Distance": 7 },
+
+      { "From": "3", "To": "1", "Distance": 3 },
+      { "From": "3", "To": "2", "Distance": 2 },
+      { "From": "3", "To": "3", "Distance": 0 },
+      { "From": "3", "To": "4", "Distance": 3 },
+      { "From": "3", "To": "5", "Distance": 5 },
+
+      { "From": "4", "To": "1", "Distance": 6 },
+      { "From": "4", "To": "2", "Distance": 5 },
+      { "From": "4", "To": "3", "Distance": 3 },
+      { "From": "4", "To": "4", "Distance": 0 },
+      { "From": "4", "To": "5", "Distance": 7 },
+
+      { "From": "5", "To": "1", "Distance": 8 },
+      { "From": "5", "To": "2", "Distance": 7 },
+      { "From": "5", "To": "3", "Distance": 5 },
+      { "From": "5", "To": "4", "Distance": 7 },
+      { "From": "5", "To": "5", "Distance": 0 }
+    ]
+  },
+  {
+    "Name": "DirectedWeighted_Negative",
+    "Text": "s->a:1\ns->b:4\na->b:-3\na->t:2\nb->t:3",
+    "ExpectedNodeCount": 4,
+    "ExpectedEdgeCount": 5,
+    "ExpectedDirected": true,
+    "ExpectedMstTotalWeight": null,
+    "ExpectedMaxFlow": null,
+    "ExpectedDistances": [
+      { "From": "s", "To": "s", "Distance": 0 },
+      { "From": "s", "To": "a", "Distance": 1 },
+      { "From": "s", "To": "b", "Distance": -2 },
+      { "From": "s", "To": "t", "Distance": 1 },
+
+      { "From": "a", "To": "a", "Distance": 0 },
+      { "From": "a", "To": "b", "Distance": -3 },
+      { "From": "a", "To": "t", "Distance": 0 },
+
+      { "From": "b", "To": "b", "Distance": 0 },
+      { "From": "b", "To": "t", "Distance": 3 },
+
+      { "From": "t", "To": "t", "Distance": 0 }
+    ]
+  },
+  {
+    "Name": "DAG_Topological",
+    "Text": "A->C\nB->C\nC->D\nD->E\nB->D",
+    "ExpectedNodeCount": 5,
+    "ExpectedEdgeCount": 5,
+    "ExpectedDirected": true,
+    "ExpectedMstTotalWeight": null,
+    "ExpectedMaxFlow": null,
+    "ExpectedDistances": [
+      { "From": "A", "To": "A", "Distance": 0 },
+      { "From": "A", "To": "C", "Distance": 1 },
+      { "From": "A", "To": "D", "Distance": 2 },
+      { "From": "A", "To": "E", "Distance": 3 },
+
+      { "From": "B", "To": "B", "Distance": 0 },
+      { "From": "B", "To": "C", "Distance": 1 },
+      { "From": "B", "To": "D", "Distance": 1 },
+      { "From": "B", "To": "E", "Distance": 2 }
+    ]
+  },
+  {
+    "Name": "DirectedWeighted_Flow",
+    "Text": "s->a:10\ns->b:10\na->b:2\na->t:8\nb->t:9",
+    "ExpectedNodeCount": 4,
+    "ExpectedEdgeCount": 5,
+    "ExpectedDirected": true,
+    "ExpectedMstTotalWeight": null,
+    "ExpectedMaxFlow": 17,
+    "ExpectedDistances": [
+      { "From": "s", "To": "s", "Distance": 0 },
+      { "From": "s", "To": "a", "Distance": 10 },
+      { "From": "s", "To": "b", "Distance": 10 },
+      { "From": "s", "To": "t", "Distance": 18 },
+
+      { "From": "a", "To": "a", "Distance": 0 },
+      { "From": "a", "To": "b", "Distance": 2 },
+      { "From": "a", "To": "t", "Distance": 8 },
+
+      { "From": "b", "To": "b", "Distance": 0 },
+      { "From": "b", "To": "t", "Distance": 9 },
+
+      { "From": "t", "To": "t", "Distance": 0 }
+    ]
+  },
+  {
+    "Name": "Directed_SCC",
+    "Text": "1->2\n2->3\n3->1\n3->4\n4->5\n5->4",
+    "ExpectedNodeCount": 5,
+    "ExpectedEdgeCount": 6,
+    "ExpectedDirected": true,
+    "ExpectedMstTotalWeight": null,
+    "ExpectedMaxFlow": null,
+    "ExpectedDistances": [
+      { "From": "1", "To": "1", "Distance": 0 },
+      { "From": "1", "To": "2", "Distance": 1 },
+      { "From": "1", "To": "3", "Distance": 2 },
+      { "From": "1", "To": "4", "Distance": 3 },
+      { "From": "1", "To": "5", "Distance": 4 },
+
+      { "From": "3", "To": "1", "Distance": 1 },
+      { "From": "3", "To": "2", "Distance": 2 },
+      { "From": "3", "To": "3", "Distance": 0 },
+      { "From": "3", "To": "4", "Distance": 1 },
+      { "From": "3", "To": "5", "Distance": 2 },
+
+      { "From": "4", "To": "4", "Distance": 0 },
+      { "From": "4", "To": "5", "Distance": 1 },
+      { "From": "5", "To": "4", "Distance": 1 }
+    ]
+  },
+  {
+    "Name": "Undirected_Bridges",
+    "Text": "1--2\n2--3\n3--4\n2--4\n3--5",
+    "ExpectedNodeCount": 5,
+    "ExpectedEdgeCount": 5,
+    "ExpectedDirected": false,
+    "ExpectedMstTotalWeight": null,
+    "ExpectedMaxFlow": null,
+    "ExpectedDistances": [
+      { "From": "1", "To": "1", "Distance": 0 },
+      { "From": "1", "To": "2", "Distance": 1 },
+      { "From": "1", "To": "3", "Distance": 2 },
+      { "From": "1", "To": "4", "Distance": 2 },
+      { "From": "1", "To": "5", "Distance": 3 },
+
+      { "From": "2", "To": "1", "Distance": 1 },
+      { "From": "2", "To": "2", "Distance": 0 },
+      { "From": "2", "To": "3", "Distance": 1 },
+      { "From": "2", "To": "4", "Distance": 1 },
+      { "From": "2", "To": "5", "Distance": 2 }
+    ]
+  },
+  {
+    "Name": "UndirectedWeighted_Larger_MST",
+    "Text": "1--2:3\n1--3:1\n2--3:7\n2--4:5\n3--4:4\n3--5:2\n4--5:6\n4--6:8\n5--6:3",
+    "ExpectedNodeCount": 6,
+    "ExpectedEdgeCount": 9,
+    "ExpectedDirected": false,
+    "ExpectedMstTotalWeight": 13,
+    "ExpectedMaxFlow": null,
+    "ExpectedDistances": [
+      { "From": "1", "To": "1", "Distance": 0 },
+      { "From": "1", "To": "2", "Distance": 3 },
+      { "From": "1", "To": "3", "Distance": 1 },
+      { "From": "1", "To": "4", "Distance": 5 },
+      { "From": "1", "To": "5", "Distance": 3 },
+      { "From": "1", "To": "6", "Distance": 6 },
+
+      { "From": "2", "To": "1", "Distance": 3 },
+      { "From": "2", "To": "2", "Distance": 0 },
+      { "From": "2", "To": "3", "Distance": 4 },
+      { "From": "2", "To": "4", "Distance": 5 },
+      { "From": "2", "To": "5", "Distance": 6 },
+      { "From": "2", "To": "6", "Distance": 9 },
+
+      { "From": "3", "To": "1", "Distance": 1 },
+      { "From": "3", "To": "2", "Distance": 4 },
+      { "From": "3", "To": "3", "Distance": 0 },
+      { "From": "3", "To": "4", "Distance": 4 },
+      { "From": "3", "To": "5", "Distance": 2 },
+      { "From": "3", "To": "6", "Distance": 5 },
+
+      { "From": "4", "To": "1", "Distance": 5 },
+      { "From": "4", "To": "2", "Distance": 5 },
+      { "From": "4", "To": "3", "Distance": 4 },
+      { "From": "4", "To": "4", "Distance": 0 },
+      { "From": "4", "To": "5", "Distance": 6 },
+      { "From": "4", "To": "6", "Distance": 8 },
+
+      { "From": "5", "To": "1", "Distance": 3 },
+      { "From": "5", "To": "2", "Distance": 6 },
+      { "From": "5", "To": "3", "Distance": 2 },
+      { "From": "5", "To": "4", "Distance": 6 },
+      { "From": "5", "To": "5", "Distance": 0 },
+      { "From": "5", "To": "6", "Distance": 3 },
+
+      { "From": "6", "To": "1", "Distance": 6 },
+      { "From": "6", "To": "2", "Distance": 9 },
+      { "From": "6", "To": "3", "Distance": 5 },
+      { "From": "6", "To": "4", "Distance": 8 },
+      { "From": "6", "To": "5", "Distance": 3 },
+      { "From": "6", "To": "6", "Distance": 0 }
+    ]
+  },
+  {
+    "Name": "DirectedWeighted_ShortestPaths",
+    "Text": "A->B:2\nA->C:5\nB->C:1\nB->D:2\nC->D:3\nD->E:1\nC->E:5",
+    "ExpectedNodeCount": 5,
+    "ExpectedEdgeCount": 7,
+    "ExpectedDirected": true,
+    "ExpectedMstTotalWeight": null,
+    "ExpectedMaxFlow": null,
+    "ExpectedDistances": [
+      { "From": "A", "To": "A", "Distance": 0 },
+      { "From": "A", "To": "B", "Distance": 2 },
+      { "From": "A", "To": "C", "Distance": 3 },
+      { "From": "A", "To": "D", "Distance": 4 },
+      { "From": "A", "To": "E", "Distance": 5 },
+
+      { "From": "B", "To": "B", "Distance": 0 },
+      { "From": "B", "To": "C", "Distance": 1 },
+      { "From": "B", "To": "D", "Distance": 2 },
+      { "From": "B", "To": "E", "Distance": 3 },
+
+      { "From": "C", "To": "C", "Distance": 0 },
+      { "From": "C", "To": "D", "Distance": 3 },
+      { "From": "C", "To": "E", "Distance": 4 },
+
+      { "From": "D", "To": "D", "Distance": 0 },
+      { "From": "D", "To": "E", "Distance": 1 },
+
+      { "From": "E", "To": "E", "Distance": 0 }
+    ]
+  }
+]
