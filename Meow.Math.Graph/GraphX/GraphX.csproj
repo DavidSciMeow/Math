@@ -4,7 +4,4 @@
     <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="Graph\" />
-  </ItemGroup>
 </Project>

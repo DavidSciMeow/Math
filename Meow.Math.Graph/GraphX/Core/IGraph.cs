@@ -8,7 +8,9 @@ namespace GraphX.Core
     /// </summary>
     /// <typeparam name="NodeType">节点类型 / node type</typeparam>
     /// <typeparam name="TWeight">权重类型 / weight type</typeparam>
-    public interface IGraph<NodeType, TWeight> where NodeType : IEquatable<NodeType>
+    public interface IGraph<NodeType, TWeight> 
+        where NodeType : IEquatable<NodeType>
+        where TWeight : IComparable<TWeight>
     {
         /// <summary>
         /// 是否为有向图。<br/>Whether the graph is directed.

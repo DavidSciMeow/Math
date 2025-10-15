@@ -17,7 +17,7 @@ namespace GraphX.Algorithms
         /// </summary>
         public static PathResult<NodeType, TWeight> Dijkstra<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, NodeType start, NodeType end, IWeightOperator<TWeight> op, bool includeNodeWeight, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
-            
+            where TWeight : IComparable<TWeight>
         {
             // 先决条件：Dijkstra 要求边权非负 / Precondition: Dijkstra requires non-negative edge weights
             bool _dijkstraHasNegative = false;
@@ -1350,9 +1350,6 @@ namespace GraphX.Algorithms
             var complement = V.Where(x => !visited.Contains(x)).ToList();
             return Tuple.Create(flow, S, complement);
         }
-
-
-
 
 
     }

@@ -4,18 +4,19 @@ using System.IO;
 using System.Linq;
 using GraphX.Algorithms;
 using GraphX.Core;
-using GraphX.Graph;
+using GraphX.Parser;
 using Xunit;
 
 namespace GraphX.Tests
 {
     /// <summary>
     /// Integration tests that exercise parser + multiple GraphMethods on a collection of larger example graphs.
-    /// 中文: 集成测试，使用解析器把文本转换成图，然后对多个算法做验证。
+    /// ????: ????????????????????????????????????????????
     /// </summary>
     public class GraphParserIntegrationTests
     {
         private static LongWeightOperator Op => new();
+        private static DefaultTextParser<string, long> Parser => new();
 
         public class DistanceExpectation { public string From { get; set; } public string To { get; set; } public long Distance { get; set; } }
         public class JsonTestCase
@@ -88,7 +89,7 @@ namespace GraphX.Tests
         public void Json_MstCheck()
         {
             var tc = PickOne(g => g.ExpectedMstTotalWeight.HasValue);
-            var baseG = GraphTextParser.Parse(tc.Text, out _);
+            var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
             var mst = ig.Kruskal<string, long>();
             long total = mst.Sum(e => e.Item3);
@@ -103,7 +104,7 @@ namespace GraphX.Tests
             var all = LoadExpectations();
             foreach (var tc in all.Where(g => g.ExpectedDistances != null && g.ExpectedDistances.Count > 0))
             {
-                var baseG = GraphTextParser.Parse(tc.Text, out _);
+                var baseG = Parser.Parse(tc.Text, Op, out _);
                 IGraph<string, long> ig = baseG;
 
                 var expected = new Dictionary<(string, string), long>();
@@ -113,7 +114,7 @@ namespace GraphX.Tests
                 IGraph<string, long> floydGraph = ig;
                 if (!ig.IsDirected)
                 {
-                    var dg = new Graph.DirectedWeightedGraph();
+                    var dg = new Graph<string, long>(Op);
                     foreach (var v in ig.Nodes) dg.AddNode(v);
                     foreach (var e in ig.WeightedEdges) { dg.AddEdge(e.U, e.V, e.W, true); dg.AddEdge(e.V, e.U, e.W, true); }
                     floydGraph = dg;
@@ -157,7 +158,7 @@ namespace GraphX.Tests
             var all = LoadExpectations();
             foreach (var tc in all.Where(g => g.ExpectedDistances != null && g.ExpectedDistances.Count > 0))
             {
-                var baseG = GraphTextParser.Parse(tc.Text, out _);
+                var baseG = Parser.Parse(tc.Text, Op, out _);
                 IGraph<string, long> ig = baseG;
 
                 var expected = new Dictionary<(string, string), long>();
@@ -166,7 +167,7 @@ namespace GraphX.Tests
                 IGraph<string, long> johnGraph = ig;
                 if (!ig.IsDirected)
                 {
-                    var dg = new Graph.DirectedWeightedGraph();
+                    var dg = new Graph<string, long>(Op);
                     foreach (var v in ig.Nodes) dg.AddNode(v);
                     foreach (var e in ig.WeightedEdges) { dg.AddEdge(e.U, e.V, e.W, true); dg.AddEdge(e.V, e.U, e.W, true); }
                     johnGraph = dg;
@@ -208,7 +209,7 @@ namespace GraphX.Tests
         public void Json_DijkstraCheck()
         {
             var tc = PickOne(g => g.ExpectedDistances != null && g.ExpectedDistances.Count > 0);
-            var baseG = GraphTextParser.Parse(tc.Text, out _);
+            var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
 
             var expected = new Dictionary<(string, string), long>();
@@ -231,7 +232,7 @@ namespace GraphX.Tests
         public void Json_BellmanFordCheck()
         {
             var tc = PickOne(g => g.ExpectedDistances != null && g.ExpectedDistances.Count > 0);
-            var baseG = GraphTextParser.Parse(tc.Text, out _);
+            var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
 
             var nodes = new HashSet<string>(ig.Nodes);
@@ -254,7 +255,7 @@ namespace GraphX.Tests
         public void Json_SPFACheck()
         {
             var tc = PickOne(g => g.ExpectedDistances != null && g.ExpectedDistances.Count > 0);
-            var baseG = GraphTextParser.Parse(tc.Text, out _);
+            var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
 
             var nodes = new HashSet<string>(ig.Nodes);
@@ -277,7 +278,7 @@ namespace GraphX.Tests
         public void Json_TopologicalCheck()
         {
             var tc = PickOne(g => g.Name == "DAG_Topological");
-            var baseG = GraphTextParser.Parse(tc.Text, out _);
+            var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
             var order = ig.TopologicalSort<string, long>();
             var index = new Dictionary<string, int>();
@@ -292,7 +293,7 @@ namespace GraphX.Tests
         public void Json_MaxFlowCheck()
         {
             var tc = PickOne(g => g.ExpectedMaxFlow.HasValue);
-            var baseG = GraphTextParser.Parse(tc.Text, out _);
+            var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
             var ek = ig.EdmondsKarpMaxFlow<string>("s", "t");
             var din = ig.DinicMaxFlow<string>("s", "t");
@@ -304,7 +305,7 @@ namespace GraphX.Tests
         public void Json_SccCheck()
         {
             var tc = PickOne(g => g.Name == "Directed_SCC");
-            var baseG = GraphTextParser.Parse(tc.Text, out _);
+            var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
             var sccs = ig.StronglyConnectedComponents<string, long>();
             var sizes = sccs.Select(c => c.Count).OrderBy(x => x).ToList();
@@ -315,7 +316,7 @@ namespace GraphX.Tests
         public void Json_BridgesCheck()
         {
             var tc = PickOne(g => g.Name == "Undirected_Bridges");
-            var baseG = GraphTextParser.Parse(tc.Text, out _);
+            var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
             var bridges = ig.Bridges<string, long>();
             Assert.Contains(bridges, b => (b.U == "3" && b.V == "5") || (b.U == "5" && b.V == "3"));

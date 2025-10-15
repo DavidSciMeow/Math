@@ -2,7 +2,6 @@ using System;
 using GraphX.Algorithms;
 using GraphX.Error;
 using GraphX.Core;
-using GraphX.Graph;
 using Xunit;
 
 namespace GraphX.Tests

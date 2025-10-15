@@ -80,5 +80,14 @@ namespace GraphX.Core
                 Reachable = reachable
             };
         }
+
+        /// <summary>
+        /// 简洁的字符串表示：包含可达标志、总代价与节点序列（例如 "Reachable: True, Cost: 5, Path: s -> a -> b"）
+        /// </summary>
+        public override string ToString()
+        {
+            var nodesStr = Nodes == null || Nodes.Count == 0 ? "[]" : string.Join(" -> ", Nodes);
+            return $"Reachable: {Reachable}, Cost: {Cost}, Path: {nodesStr}";
+        }
     }
 }
