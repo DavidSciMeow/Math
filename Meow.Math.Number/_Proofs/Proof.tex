@@ -1,0 +1,146 @@
+\documentclass[11pt]{article}
+
+% XeLaTeX 字体与中文支持（使用 XeLaTeX 编译）
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setmainfont{Times New Roman}
+\setCJKmainfont[ItalicFont={SimSun},AutoFakeSlant=0.2,BoldFont={SimSun}]{SimSun}
+%\newcommand{\songti}{\CJKfamily{zhsong}}
+
+% 数学包
+\usepackage{amsmath,amssymb}
+
+% 定理环境（提供 \theoremstyle）
+\usepackage{amsthm}
+\newtheorem{theorem}{定理}
+\newtheorem{proposition}{命题}
+\newtheorem{corollary}{推论}
+\newtheorem{example}{例}
+
+% 可选：超链接与微排版
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage[a4paper,margin=1.5cm]{geometry}
+
+\begin{document}
+
+\title{本仓库的数学命题证明：有理数的整数放大性质及其扩充}
+\author{DavidSciMeow}
+\date{Oct, 24, 2025}
+\maketitle
+
+\section{记号与补充约定}
+\begin{itemize}
+  \item $\mathbb{Q}$ 表示有理数集，$\mathbb{Z}$ 表示整数集，$\mathbb{Z}_{+}$ 表示正整数集，$\mathbb{N}_0=\{0,1,2,\dots\}$。
+  \item 若 $n$ 为正整数，则写其素因子分解为 $n=\prod_{\pi}\pi^{e_\pi(n)}$，其中 $\pi$ 遍历素数，$e_\pi(n)\in\mathbb{Z}_{\ge 0}$ 为素数 $\pi$ 在 $n$ 中的指数。
+  \item 对素数 $\pi$ 定义 $\pi$-adic 指数对整数 $n>0$ 令 $v_\pi(n):=e_\pi(n)$。对任意有理数 $r=\dfrac{a}{b}$（互素表示，$a\in\mathbb{Z},b\in\mathbb{Z}_{+}$），可推广定义
+  \[
+    v_\pi(r):=v_\pi(a)-v_\pi(b).
+  \]
+  \item 对固定的进制基数 $p\ge2$（不必为素数），我们关心是否存在 $k\in\mathbb{N}_0$ 使得 $p^k q\in\mathbb{Z}$。
+\end{itemize}
+
+\section{基本命题与证明（有理数情形）}
+
+\begin{theorem}
+  对任意 $q\in\mathbb{Q}$，存在正整数 $K\in\mathbb{Z}_{+}$ 使得 $Kq\in\mathbb{Z}$。
+\end{theorem}
+
+\begin{proof}
+任取 $q\in\mathbb{Q}$，将其表示为最简分数
+\[
+q=\frac{a}{b},
+\]
+其中 $a\in\mathbb{Z},\ b\in\mathbb{Z}_{+}$，且 $\gcd(a,b)=1$。取 $K=b$，则
+\[
+Kq=b\cdot\frac{a}{b}=a\in\mathbb{Z}.
+\]
+因此存在正整数 $K$（例如分母 $b$）使得 $Kq\in\mathbb{Z}$，证明完毕。
+\end{proof}
+
+\begin{theorem}
+关于基 $p$ 的等价条件。设固定基数 $p\ge2$（不必为素数）。
+令 $q=\dfrac{a}{b}$ 为最简分数，$a\in\mathbb{Z},\ b\in\mathbb{Z}_{+},\ \gcd(a,b)=1$。
+下列命题等价：
+\begin{enumerate}
+  \item 存在 $k\in\mathbb{N}_0$ 使得 $p^k q\in\mathbb{Z}$。
+  \item 存在 $k\in\mathbb{N}_0$ 使得 $b\mid p^k$。
+  \item $b$ 的所有素因子都出现在 $p$ 的素因子分解中：对任意素数 $\pi$，若 $v_\pi(b)>0$ 则 $v_\pi(p)>0$。
+\end{enumerate}
+特别地，当 $p$ 为素数时，上述等价于 $b$ 為 $p$ 的幂，即 $b=p^m$ 对某个 $m\in\mathbb{N}_0$。
+\end{theorem}
+
+\begin{proof}
+(1)$\Rightarrow$(2): 若存在 $k$ 使 $p^k q\in\mathbb{Z}$，则 $p^k\cdot\frac{a}{b}\in\mathbb{Z}$，即 $b\mid p^k a$。由于 $\gcd(a,b)=1$，故 $b\mid p^k$。
+
+(2)$\Rightarrow$(1): 若 $b\mid p^k$，则 $p^k q=p^k\cdot\frac{a}{b}\in\mathbb{Z}$。
+
+(2)$\Leftrightarrow$(3): 将 $p$ 与 $b$ 写成素因子分解
+\[
+p=\prod_{\pi}\pi^{v_\pi(p)},\qquad b=\prod_{\pi}\pi^{v_\pi(b)}.
+\]
+条件 $b\mid p^k$ 等价于对每个素数 $\pi$ 有
+\[
+v_\pi(b)\le v_\pi(p^k)=k\,v_\pi(p).
+\]
+若存在某素数 $\pi$ 使 $v_\pi(b)>0$ 且 $v_\pi(p)=0$，则右侧恒为 $0$，不可能 $\ge v_\pi(b)>0$，故必须有若 $v_\pi(b)>0$ 则 $v_\pi(p)>0$。反过来若对所有出现在 $b$ 的素因子 $\pi$ 都有 $v_\pi(p)\ge1$，则取
+\[
+k\ge \max_{\pi:\,v_\pi(b)>0}\left\lceil\frac{v_\pi(b)}{v_\pi(p)}\right\rceil,
+\]
+即可保证 $k\,v_\pi(p)\ge v_\pi(b)$ 对所有 $\pi$ 成立，从而 $b\mid p^k$。
+\end{proof}
+
+\section{关于最小的的显式公式}
+设 $p$ 的素因子集合为 $\{\pi_1,\dots,\pi_r\}$，且 $v_{\pi_i}(p)=f_i\ge1$。把 $b$ 在这些素因子下的指数记作 $e_i:=v_{\pi_i}(b)$（若某 $\pi_i$ 未出现在 $b$ 中则 $e_i=0$）。若存在 $\pi\notin\{\pi_1,\dots,\pi_r\}$ 使 $v_\pi(b)>0$，则不存在 $k$ 使 $b\mid p^k$。若所有出现在 $b$ 中的素因子都包含于 $\{\pi_1,\dots,\pi_r\}$，则最小的符合条件的 $k$ 为
+\[
+k_{\min}=\max_{1\le i\le r}\left\lceil\frac{e_i}{f_i}\right\rceil.
+\]
+特别地，当 $p$ 为素数时只有一项，$f_1=1$，因此 $k_{\min}=e_1=v_p(b)$，此时 $b$ 必为 $p$ 的幂。
+
+\section{基下有限小数表示的等价性}
+在基 $p$ 的位置表示中，右移小数点 $k$ 位相当于乘以 $p^k$。因此：
+\[
+q\ \text{在基 }p\text{ 下有有限小数表示}
+\quad\Longleftrightarrow\quad
+\exists k\in\mathbb{N}_0\text{ 使得 }p^k q\in\mathbb{Z}.
+\]
+结合前述定理可得到判定条件：$q=a/b$ 在基 $p$ 下有有限小数表示当且仅当 $b$ 的所有素因子都出现在 $p$ 的素因子分解中。对十进制（$p=10$）而言，这意味着分母 $b$ 只包含素因子 $2$ 与 $5$。
+
+\section{关于把命题推广到实数集的不可能性}
+我们不能把“任意数都能被某个整数放大为整数”这一性质推广到整个实数集。更精确地，固定 $p\ge2$，定义集合
+\[
+S_p:=\{x\in\mathbb{R}:\exists k\in\mathbb{N}_0,\ p^k x\in\mathbb{Z}\}.
+\]
+显然 $S_p=\bigcup_{k\ge0} p^{-k}\mathbb{Z}$，每个 $p^{-k}\mathbb{Z}$ 与 $\mathbb{Z}$ 基数相同（可数），因此 $S_p$ 为可数并集，亦可数。由 Cantor 的定理（对角线论证）可知 $\mathbb{R}$ 是不可数的，所以 $S_p\neq\mathbb{R}$，亦即不能对所有实数都成立。
+
+具体反例也很简单：任取无理数（如 $\sqrt{2}$），若存在非零整数 $K$ 使 $K\sqrt{2}\in\mathbb{Z}$，则 $\sqrt{2}$ 为有理数，矛盾。因此对 $\sqrt{2}$ 不存在这样的 $K$。
+
+\subsection{Cantor 对角线论证}
+Cantor 的经典证明给出 $\mathbb{R}$ 不可数：若假设存在将所有实数与自然数一一对应的枚举，那么可以构造一个与任一枚举中第 $n$ 个数在第 $n$ 位小数处不同的新实数，从而得到矛盾。该论证说明了 $\mathbb{R}$ 的势大于 $\mathbb{N}$，从而不可能包含在任何可数集合之中。这里正是用于说明 $S_p$（可数）不可能等于 $\mathbb{R}$（不可数）的根本原因。
+
+\subsection{实数的稠密性}
+补充说明：尽管 $\mathbb{Q}$ 是可数集，但在实数轴中稠密。即对任意 $x\in\mathbb{R}$ 和任意 $\varepsilon>0$，存在 $q\in\mathbb{Q}$ 使 $|x-q|<\varepsilon$。证明可用阿基米德性：取 $n\in\mathbb{N}$ 使 $1/n<\varepsilon$，令 $k=\lfloor nx\rfloor$，则 $k/n\le x<(k+1)/n$，从而 $|x-k/n|<\varepsilon$。这解释了为什么任意实数任意小邻域内都包含有理数，但并不意味着可以把所有实数都写成分母为某固定形式的有理数（或者说，都能被某个整数放大为整数）。
+
+\newpage
+
+\section{参考资料}
+\begin{itemize}
+  \item D. S. Dummit, R. M. Foote, ``Abstract Algebra''（关于整环与分式域的章节）。
+  \item T. W. Hungerford, ``Algebra''（分式域与局部化的处理）。
+  \item W. Rudin, ``Principles of Mathematical Analysis''（实数与有理数、稠密性的讨论）。
+\end{itemize}
+
+\section*{结论}
+\begin{align*}
+&\forall q\in\mathbb{Q}\ \exists K\in\mathbb{Z}_{+}:\ Kq\in\mathbb{Z}.\\
+&\text{设 }q=a/b\ (\text{最简}),\ p\ge2\text{ 固定，则}\\
+&\qquad\bigl(\exists k\in\mathbb{N}_0:\ p^k q\in\mathbb{Z}\bigr)
+\iff
+\bigl(\exists k\in\mathbb{N}_0:\ b\mid p^k\bigr)
+\iff
+\bigl(\forall\pi\ \text{prime},\ v_\pi(b)>0\Rightarrow v_\pi(p)>0\bigr).
+\end{align*}
+
+\bigskip
+
+\end{document}
