@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -7,9 +7,9 @@ namespace MathX.Number
 {
     /// <summary>
     /// Arbitrary-size integer (Z).<br/>
-    /// ÈÎÒâ¾«¶ÈÕûÊı£¨Z£©¡£<br/>
+    /// ä»»æ„ç²¾åº¦æ•´æ•°ï¼ˆZï¼‰ã€‚<br/>
     /// Internal storage: magnitude bytes in little-endian in `_data`. Sign stored in `Flags` LSB (0=positive,1=negative).<br/>
-    /// ÄÚ²¿´æ´¢£ºÒÔĞ¡¶ËĞòÔÚ `_data` ÖĞ±£´æ·ù¶È×Ö½Ú¡£·ûºÅÎ»±£´æÔÚ `Flags` µÄ×îµÍÎ»£¨0=Õı£¬1=¸º£©¡£
+    /// å†…éƒ¨å­˜å‚¨ï¼šä»¥å°ç«¯åºåœ¨ `_data` ä¸­ä¿å­˜å¹…åº¦å­—èŠ‚ã€‚ç¬¦å·ä½ä¿å­˜åœ¨ `Flags` çš„æœ€ä½ä½ï¼ˆ0=æ­£ï¼Œ1=è´Ÿï¼‰ã€‚
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public sealed class GrandInt : IComparable, IComparable<GrandInt>, IConvertible, IEquatable<GrandInt>, IFormattable
@@ -17,9 +17,10 @@ namespace MathX.Number
         [MarshalAs(UnmanagedType.I4)]
         private int _length; // number of used bytes in _data
         /// <summary>
+        /// 
         /// Flags byte: LSB used as sign indicator (0 = positive,1 = negative).<br/>
-        /// ±êÖ¾×Ö½Ú£º×îµÍÎ»×÷Îª·ûºÅÖ¸Ê¾£¨0 = Õı£¬1 =¸º£©¡£
-        /// Other bits reserved for future use. /ÆäËûÎ»±£ÁôÒÔ±¸½«À´Ê¹ÓÃ¡£
+        /// æ ‡å¿—å­—èŠ‚ï¼šæœ€ä½ä½ä½œä¸ºç¬¦å·æŒ‡ç¤ºï¼ˆ0 = æ­£ï¼Œ1 =è´Ÿï¼‰ã€‚
+        /// Other bits reserved for future use. /å…¶ä»–ä½ä¿ç•™ä»¥å¤‡å°†æ¥ä½¿ç”¨ã€‚
         /// </summary>
         [MarshalAs(UnmanagedType.U1)]
         public byte Flags; // flags byte
@@ -30,7 +31,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Serialization format: [8-byte little-endian ulong length][Flags][data bytes...]<br/>
-        /// ĞòÁĞ»¯¸ñÊ½£º [8 ×Ö½ÚĞ¡¶Ë ulong ³¤¶È][Flags][Êı¾İ×Ö½Ú...]
+        /// åºåˆ—åŒ–æ ¼å¼ï¼š [8 å­—èŠ‚å°ç«¯ ulong é•¿åº¦][Flags][æ•°æ®å­—èŠ‚...]
         /// </summary>
         public GrandInt()
         {
@@ -43,9 +44,9 @@ namespace MathX.Number
 
         /// <summary>
         /// Create from signed64-bit value.<br/>
-        /// Ê¹ÓÃÓĞ·ûºÅ64 Î»ÕûÊı´´½¨¡£
+        /// ä½¿ç”¨æœ‰ç¬¦å·64 ä½æ•´æ•°åˆ›å»ºã€‚
         /// </summary>
-        /// <param name="v">Signed64-bit input / ÓĞ·ûºÅ64 Î»ÊäÈë</param>
+        /// <param name="v">Signed64-bit input / æœ‰ç¬¦å·64 ä½è¾“å…¥</param>
         public GrandInt(long v) : this()
         {
             if (v < 0)
@@ -61,9 +62,9 @@ namespace MathX.Number
 
         /// <summary>
         /// Create from unsigned64-bit value.<br/>
-        /// Ê¹ÓÃÎŞ·ûºÅ64 Î»ÕûÊı´´½¨¡£
+        /// ä½¿ç”¨æ— ç¬¦å·64 ä½æ•´æ•°åˆ›å»ºã€‚
         /// </summary>
-        /// <param name="v">Unsigned64-bit input / ÎŞ·ûºÅ64 Î»ÊäÈë</param>
+        /// <param name="v">Unsigned64-bit input / æ— ç¬¦å·64 ä½è¾“å…¥</param>
         public GrandInt(ulong v) : this()
         {
             FromUInt64Unchecked(v);
@@ -71,12 +72,12 @@ namespace MathX.Number
 
         /// <summary>
         /// Create from raw magnitude bytes (little-endian).<br/>
-        /// ´ÓÔ­Ê¼·ù¶È×Ö½Ú£¨Ğ¡¶Ë£©´´½¨¡£<br/>
+        /// ä»åŸå§‹å¹…åº¦å­—èŠ‚ï¼ˆå°ç«¯ï¼‰åˆ›å»ºã€‚<br/>
         /// `isNegative` sets the sign flag if true.<br/>
-        /// Èç¹ûÎª true ÔòÉèÖÃÎª¸ºÊı¡£
+        /// å¦‚æœä¸º true åˆ™è®¾ç½®ä¸ºè´Ÿæ•°ã€‚
         /// </summary>
-        /// <param name="magnitudeLittleEndian">Magnitude bytes, LSB first / ·ù¶È×Ö½Ú£¬Ğ¡¶ËĞò</param>
-        /// <param name="isNegative">Sign indicator / ÊÇ·ñÎª¸º</param>
+        /// <param name="magnitudeLittleEndian">Magnitude bytes, LSB first / å¹…åº¦å­—èŠ‚ï¼Œå°ç«¯åº</param>
+        /// <param name="isNegative">Sign indicator / æ˜¯å¦ä¸ºè´Ÿ</param>
         public GrandInt(byte[] magnitudeLittleEndian, bool isNegative = false) : this()
         {
             if (magnitudeLittleEndian == null || magnitudeLittleEndian.Length == 0)
@@ -96,9 +97,9 @@ namespace MathX.Number
         // --- internal helpers ---
         /// <summary>
         /// Ensure internal buffer has at least `size` capacity.<br/>
-        /// È·±£ÄÚ²¿»º³åÇøÖÁÉÙÓµÓĞ `size` ´óĞ¡µÄÈİÁ¿¡£
+        /// ç¡®ä¿å†…éƒ¨ç¼“å†²åŒºè‡³å°‘æ‹¥æœ‰ `size` å¤§å°çš„å®¹é‡ã€‚
         /// </summary>
-        /// <param name="size">Required capacity in bytes / ËùĞèÈİÁ¿£¨×Ö½Ú£©</param>
+        /// <param name="size">Required capacity in bytes / æ‰€éœ€å®¹é‡ï¼ˆå­—èŠ‚ï¼‰</param>
         private void EnsureCapacity(int size)
         {
             if (_data == null) _data = new byte[System.Math.Max(1, size)];
@@ -113,9 +114,9 @@ namespace MathX.Number
 
         /// <summary>
         /// Append a single byte to the magnitude (least-significant side).<br/>
-        /// ÔÚ·ù¶ÈÄ©Î²×·¼Óµ¥×Ö½Ú£¨×îĞ¡ÓĞĞ§×Ö½Ú·½Ïò£©¡£
+        /// åœ¨å¹…åº¦æœ«å°¾è¿½åŠ å•å­—èŠ‚ï¼ˆæœ€å°æœ‰æ•ˆå­—èŠ‚æ–¹å‘ï¼‰ã€‚
         /// </summary>
-        /// <param name="b">Byte to append / Òª×·¼ÓµÄ×Ö½Ú</param>
+        /// <param name="b">Byte to append / è¦è¿½åŠ çš„å­—èŠ‚</param>
         private void AppendByte(byte b)
         {
             EnsureCapacity(_length + 1);
@@ -124,10 +125,10 @@ namespace MathX.Number
 
         /// <summary>
         /// Replace internal magnitude with a copy of `src` (first `srcLen` bytes).<br/>
-        /// ÓÃ `src` µÄÇ° `srcLen` ×Ö½ÚÌæ»»ÄÚ²¿·ù¶È£¨¸´ÖÆ£©¡£
+        /// ç”¨ `src` çš„å‰ `srcLen` å­—èŠ‚æ›¿æ¢å†…éƒ¨å¹…åº¦ï¼ˆå¤åˆ¶ï¼‰ã€‚
         /// </summary>
-        /// <param name="src">Source buffer / Ô´»º³åÇø</param>
-        /// <param name="srcLen">Number of bytes to copy /¸´ÖÆµÄ×Ö½ÚÊı</param>
+        /// <param name="src">Source buffer / æºç¼“å†²åŒº</param>
+        /// <param name="srcLen">Number of bytes to copy /å¤åˆ¶çš„å­—èŠ‚æ•°</param>
         private void SetBytesFrom(byte[] src, int srcLen)
         {
             if (srcLen == 0)
@@ -141,10 +142,10 @@ namespace MathX.Number
 
         /// <summary>
         /// Parse serialized layout: [8-byte length][Flags][data bytes...]<br/>
-        /// ´ÓĞòÁĞ»¯»º³åÇø½âÎö³ö GrandInt¡£ÆÚÍû¸ñÊ½ÈçÉÏ¡£
+        /// ä»åºåˆ—åŒ–ç¼“å†²åŒºè§£æå‡º GrandIntã€‚æœŸæœ›æ ¼å¼å¦‚ä¸Šã€‚
         /// </summary>
-        /// <param name="buf">Serialized buffer / ĞòÁĞ»¯»º³åÇø</param>
-        /// <returns>Parsed GrandInt /½âÎö³öµÄ GrandInt</returns>
+        /// <param name="buf">Serialized buffer / åºåˆ—åŒ–ç¼“å†²åŒº</param>
+        /// <returns>Parsed GrandInt /è§£æå‡ºçš„ GrandInt</returns>
         public static GrandInt FromSerialized(byte[] buf)
         {
             if (buf == null || buf.Length == 0) throw new ArgumentException("buffer empty");
@@ -165,7 +166,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Serialize to [8-byte little-endian length][Flags][data bytes...]<br/>
-        /// ĞòÁĞ»¯Îª´ø³¤¶ÈÇ°×ºµÄ»º³åÇø¡£
+        /// åºåˆ—åŒ–ä¸ºå¸¦é•¿åº¦å‰ç¼€çš„ç¼“å†²åŒºã€‚
         /// </summary>
         public byte[] ToSerialized()
         {
@@ -182,9 +183,9 @@ namespace MathX.Number
 
         /// <summary>
         /// Initialize magnitude from unsigned64-bit value (internal helper).<br/>
-        /// ´ÓÎŞ·ûºÅ64 Î»Öµ³õÊ¼»¯·ù¶È£¨ÄÚ²¿Ê¹ÓÃ£©¡£
+        /// ä»æ— ç¬¦å·64 ä½å€¼åˆå§‹åŒ–å¹…åº¦ï¼ˆå†…éƒ¨ä½¿ç”¨ï¼‰ã€‚
         /// </summary>
-        /// <param name="v">Unsigned64-bit value / ÎŞ·ûºÅ64 Î»Öµ</param>
+        /// <param name="v">Unsigned64-bit value / æ— ç¬¦å·64 ä½å€¼</param>
         private void FromUInt64Unchecked(ulong v)
         {
             _length = 0;
@@ -205,7 +206,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Trim leading zero bytes from magnitude and normalize zero sign to positive.<br/>
-        /// ĞŞ¼ô·ù¶ÈÇ°µ¼Áã²¢½«ÁãµÄ·ûºÅ¹éÒ»»¯ÎªÕı¡£
+        /// ä¿®å‰ªå¹…åº¦å‰å¯¼é›¶å¹¶å°†é›¶çš„ç¬¦å·å½’ä¸€åŒ–ä¸ºæ­£ã€‚
         /// </summary>
         private void TrimMagnitude()
         {
@@ -220,27 +221,27 @@ namespace MathX.Number
 
         /// <summary>
         /// Whether value is negative.<br/>
-        /// ÊÇ·ñÎª¸ºÊı¡£
+        /// æ˜¯å¦ä¸ºè´Ÿæ•°ã€‚
         /// </summary>
         public bool IsNegative => (Flags & SignMask) != 0;
 
         /// <summary>
         /// Whether value equals zero.<br/>
-        /// ÊÇ·ñÎªÁã¡£
+        /// æ˜¯å¦ä¸ºé›¶ã€‚
         /// </summary>
         public bool IsZero() => _length == 1 && _data[0] == 0;
 
         /// <summary>
         /// Number of bytes used by magnitude (little-endian).<br/>
-        /// ·ù¶ÈÊ¹ÓÃµÄ×Ö½ÚÊı£¨Ğ¡¶ËĞò£©¡£
+        /// å¹…åº¦ä½¿ç”¨çš„å­—èŠ‚æ•°ï¼ˆå°ç«¯åºï¼‰ã€‚
         /// </summary>
         public int Length => _length;
 
         /// <summary>
         /// Return a copy of the magnitude bytes (little-endian).<br/>
-        /// ·µ»Ø·ù¶È×Ö½ÚµÄ¸±±¾£¨Ğ¡¶Ë£©¡£
+        /// è¿”å›å¹…åº¦å­—èŠ‚çš„å‰¯æœ¬ï¼ˆå°ç«¯ï¼‰ã€‚
         /// </summary>
-        /// <returns>Byte array copy / ×Ö½ÚÊı×é¸±±¾</returns>
+        /// <returns>Byte array copy / å­—èŠ‚æ•°ç»„å‰¯æœ¬</returns>
         public byte[] GetMagnitudeBytes()
         {
             var a = new byte[_length];
@@ -250,16 +251,16 @@ namespace MathX.Number
 
         /// <summary>
         /// Reports backing array capacity (heap allocation).<br/>
-        /// ±¨¸æÄÚ²¿»º³åÇøÈİÁ¿£¨¶Ñ·ÖÅä£©¡£
+        /// æŠ¥å‘Šå†…éƒ¨ç¼“å†²åŒºå®¹é‡ï¼ˆå †åˆ†é…ï¼‰ã€‚
         /// </summary>
-        /// <returns>Capacity in bytes / ÈİÁ¿£¨×Ö½Ú£©</returns>
+        /// <returns>Capacity in bytes / å®¹é‡ï¼ˆå­—èŠ‚ï¼‰</returns>
         public int GetHeapAllocatedSize() => _data?.Length ?? 0;
 
         /// <summary>
         /// Compare absolute magnitudes. return -1,0,1<br/>
-        /// ±È½Ï¾ø¶Ô·ù¶È´óĞ¡¡£·µ»Ø -1¡¢0¡¢1¡£
+        /// æ¯”è¾ƒç»å¯¹å¹…åº¦å¤§å°ã€‚è¿”å› -1ã€0ã€1ã€‚
         /// </summary>
-        /// <returns>Comparison result / ±È½Ï½á¹û</returns>
+        /// <returns>Comparison result / æ¯”è¾ƒç»“æœ</returns>
         private static int CompareMagnitude(byte[] a, int alen, byte[] b, int blen)
         {
             if (alen != blen) return alen < blen ? -1 : 1;
@@ -272,9 +273,9 @@ namespace MathX.Number
 
         /// <summary>
         /// Compare as signed integers.<br/>
-        /// ½«Á½¸ö GrandInt×÷ÎªÓĞ·ûºÅÕûÊı±È½Ï¡£<br/>
+        /// å°†ä¸¤ä¸ª GrandIntä½œä¸ºæœ‰ç¬¦å·æ•´æ•°æ¯”è¾ƒã€‚<br/>
         /// Inherits documentation from IComparable&lt;GrandInt&gt;.<br/>
-        ///¼Ì³Ğ×Ô IComparable&lt;GrandInt&gt; µÄÎÄµµ¡£
+        ///ç»§æ‰¿è‡ª IComparable&lt;GrandInt&gt; çš„æ–‡æ¡£ã€‚
         /// </summary>
         /// <inheritdoc/>
         public int CompareTo(GrandInt other)
@@ -286,7 +287,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Compare to object (explicit interface implementation).<br/>
-        /// Óë¶ÔÏó±È½Ï£¨½Ó¿ÚÏÔÊ½ÊµÏÖ£©¡£
+        /// ä¸å¯¹è±¡æ¯”è¾ƒï¼ˆæ¥å£æ˜¾å¼å®ç°ï¼‰ã€‚
         /// </summary>
         /// <inheritdoc/>
         int IComparable.CompareTo(object obj)
@@ -298,7 +299,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Equality comparison for GrandInt.<br/>
-        /// ±È½ÏÁ½¸ö GrandInt ÊÇ·ñÏàµÈ¡£
+        /// æ¯”è¾ƒä¸¤ä¸ª GrandInt æ˜¯å¦ç›¸ç­‰ã€‚
         /// </summary>
         public bool Equals(GrandInt other) => Flags == other.Flags && CompareMagnitude(_data, _length, other._data, other._length) == 0;
         
@@ -307,7 +308,7 @@ namespace MathX.Number
         
         /// <summary>
         /// Compute hash code for this GrandInt.<br/>
-        ///¼ÆËã GrandInt µÄ¹şÏ£Âë¡£
+        ///è®¡ç®— GrandInt çš„å“ˆå¸Œç ã€‚
         /// </summary>
         public override int GetHashCode()
         {
@@ -321,7 +322,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Add magnitudes a + b -> result (little-endian).<br/>
-        /// ·ù¶ÈÏà¼Ó£¨Ğ¡¶Ë£©£¬·µ»Ø½á¹ûÊı×é¡£
+        /// å¹…åº¦ç›¸åŠ ï¼ˆå°ç«¯ï¼‰ï¼Œè¿”å›ç»“æœæ•°ç»„ã€‚
         /// </summary>
         private static unsafe byte[] AddMagnitude(byte[] a, int alen, byte[] b, int blen)
         {
@@ -352,7 +353,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Subtract magnitudes a - b, assume a >= b.<br/>
-        /// ·ù¶ÈÏà¼õ£¨a >= b£©¡£
+        /// å¹…åº¦ç›¸å‡ï¼ˆa >= bï¼‰ã€‚
         /// </summary>
         private static byte[] SubtractMagnitude(byte[] a, int alen, byte[] b, int blen)
         {
@@ -382,7 +383,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Multiply magnitudes using schoolbook algorithm (little-endian).<br/>
-        /// Ñ§Ğ£³Ë·¨Ëã·¨ÊµÏÖ·ù¶ÈÏà³Ë£¨Ğ¡¶Ë£©¡£
+        /// å­¦æ ¡ä¹˜æ³•ç®—æ³•å®ç°å¹…åº¦ç›¸ä¹˜ï¼ˆå°ç«¯ï¼‰ã€‚
         /// </summary>
         private static unsafe byte[] MultiplyMagnitude(byte[] a, int alen, byte[] b, int blen)
         {
@@ -416,7 +417,7 @@ namespace MathX.Number
         // Public arithmetic operators (signed)
         /// <summary>
         /// Add operator implementation (signed).<br/>
-        /// ¼Ó·¨ÔËËã·ûÊµÏÖ£¨ÓĞ·ûºÅ£©¡£
+        /// åŠ æ³•è¿ç®—ç¬¦å®ç°ï¼ˆæœ‰ç¬¦å·ï¼‰ã€‚
         /// </summary>
         public static GrandInt operator +(GrandInt a, GrandInt b)
         {
@@ -464,7 +465,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Subtraction operator (a - b).<br/>
-        /// ¼õ·¨ÔËËã·ûÊµÏÖ¡£
+        /// å‡æ³•è¿ç®—ç¬¦å®ç°ã€‚
         /// </summary>
         public static GrandInt operator -(GrandInt a, GrandInt b)
         {
@@ -477,7 +478,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Multiplication operator (signed).<br/>
-        ///³Ë·¨ÔËËã·ûÊµÏÖ£¨ÓĞ·ûºÅ£©¡£
+        ///ä¹˜æ³•è¿ç®—ç¬¦å®ç°ï¼ˆæœ‰ç¬¦å·ï¼‰ã€‚
         /// </summary>
         public static GrandInt operator *(GrandInt a, GrandInt b)
         {
@@ -493,7 +494,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Divide magnitude by small uint, returning quotient and remainder.<br/>
-        /// ½«·ù¶È³ıÒÔĞ¡ÕûĞÍ£¬·µ»ØÉÌ£¨·ù¶ÈÊı×é£©ºÍÓàÊı¡£
+        /// å°†å¹…åº¦é™¤ä»¥å°æ•´å‹ï¼Œè¿”å›å•†ï¼ˆå¹…åº¦æ•°ç»„ï¼‰å’Œä½™æ•°ã€‚
         /// </summary>
         private static (byte[] quotient, uint remainder) DivModMagnitudeByUInt(byte[] mag, int len, uint divisor)
         {
@@ -526,7 +527,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Convert value to decimal string.<br/>
-        /// ×ª»»ÎªÊ®½øÖÆ×Ö·û´®±íÊ¾¡£
+        /// è½¬æ¢ä¸ºåè¿›åˆ¶å­—ç¬¦ä¸²è¡¨ç¤ºã€‚
         /// </summary>
         public string ToDecimalString()
         {
@@ -549,7 +550,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Returns string representation (decimal).<br/>
-        /// ·µ»Ø×Ö·û´®±íÊ¾£¨Ê®½øÖÆ£©¡£
+        /// è¿”å›å­—ç¬¦ä¸²è¡¨ç¤ºï¼ˆåè¿›åˆ¶ï¼‰ã€‚
         /// </summary>
         public override string ToString() => ToDecimalString();
 
@@ -599,7 +600,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Create GrandInt from raw magnitude bytes (factory).<br/>
-        /// ´ÓÔ­Ê¼·ù¶È×Ö½Ú´´½¨ GrandInt µÄ¹¤³§·½·¨¡£
+        /// ä»åŸå§‹å¹…åº¦å­—èŠ‚åˆ›å»º GrandInt çš„å·¥å‚æ–¹æ³•ã€‚
         /// </summary>
         public static GrandInt FromMagnitude(byte[] mag, bool negative = false)
         {
@@ -611,7 +612,7 @@ namespace MathX.Number
         // -------------------------
         /// <summary>
         /// Format using IFormattable contract.<br/>
-        /// Ê¹ÓÃ IFormattable ºÏÔ¼½øĞĞ¸ñÊ½»¯¡£¼Ì³Ğ½Ó¿ÚÎÄµµ¡£ 
+        /// ä½¿ç”¨ IFormattable åˆçº¦è¿›è¡Œæ ¼å¼åŒ–ã€‚ç»§æ‰¿æ¥å£æ–‡æ¡£ã€‚ 
         /// </summary>
         /// <inheritdoc/>
         public string ToString(string format, IFormatProvider formatProvider)
@@ -631,7 +632,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Produce hexadecimal string of magnitude (MSB first).<br/>
-        /// ÒÔÊ®Áù½øÖÆĞÎÊ½Êä³ö·ù¶È£¨×î¸ß×Ö½ÚÓÅÏÈ£©¡£
+        /// ä»¥åå…­è¿›åˆ¶å½¢å¼è¾“å‡ºå¹…åº¦ï¼ˆæœ€é«˜å­—èŠ‚ä¼˜å…ˆï¼‰ã€‚
         /// </summary>
         private string ToHexString()
         {
@@ -652,7 +653,7 @@ namespace MathX.Number
         // -------------------------
         /// <summary>
         /// Ensure static capacity for parsing helpers.
-        /// Îª½âÎö¸¨Öúº¯ÊıÈ·±£¾²Ì¬»º³åÇøÈİÁ¿¡£
+        /// ä¸ºè§£æè¾…åŠ©å‡½æ•°ç¡®ä¿é™æ€ç¼“å†²åŒºå®¹é‡ã€‚
         /// </summary>
         private static void EnsureCapacityStatic(ref byte[] mag, int required, int currentLen)
         {
@@ -668,7 +669,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Multiply magnitude in-place by small uint (parsing helper).
-        /// ¾ÍµØ½«·ù¶È³ËÒÔĞ¡ÕûĞÍ£¨½âÎö¸¨Öú£©¡£
+        /// å°±åœ°å°†å¹…åº¦ä¹˜ä»¥å°æ•´å‹ï¼ˆè§£æè¾…åŠ©ï¼‰ã€‚
         /// </summary>
         private static void MultiplyInPlace(ref byte[] mag, ref int len, uint factor)
         {
@@ -696,7 +697,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Add small uint to magnitude in-place (parsing helper).
-        /// ¾ÍµØ½«Ğ¡ÕûĞÍ¼Óµ½·ù¶ÈÖĞ£¨½âÎö¸¨Öú£©¡£
+        /// å°±åœ°å°†å°æ•´å‹åŠ åˆ°å¹…åº¦ä¸­ï¼ˆè§£æè¾…åŠ©ï¼‰ã€‚
         /// </summary>
         private static void AddUIntInPlace(ref byte[] mag, ref int len, uint add)
         {
@@ -722,7 +723,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Try parse string into GrandInt. Supports decimal,0x hex,0b binary and '_' separators.<br/>
-        /// ³¢ÊÔ½«×Ö·û´®½âÎöÎª GrandInt¡£Ö§³ÖÊ®½øÖÆ¡¢0x Ê®Áù½øÖÆ¡¢0b ¶ş½øÖÆÒÔ¼°ÏÂ»®Ïß·Ö¸ô¡£
+        /// å°è¯•å°†å­—ç¬¦ä¸²è§£æä¸º GrandIntã€‚æ”¯æŒåè¿›åˆ¶ã€0x åå…­è¿›åˆ¶ã€0b äºŒè¿›åˆ¶ä»¥åŠä¸‹åˆ’çº¿åˆ†éš”ã€‚
         /// </summary>
         public static bool TryParse(string s, out GrandInt result)
         {
@@ -802,7 +803,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Parse string into GrandInt or throw on failure.<br/>
-        /// ½«×Ö·û´®½âÎöÎª GrandInt£¬Ê§°ÜÅ×³öÒì³£¡£
+        /// å°†å­—ç¬¦ä¸²è§£æä¸º GrandIntï¼Œå¤±è´¥æŠ›å‡ºå¼‚å¸¸ã€‚
         /// </summary>
         public static GrandInt Parse(string s)
         {
@@ -818,7 +819,7 @@ namespace MathX.Number
 
         /// <summary>
         /// Try to obtain the unsigned64-bit absolute value of this GrandInt. Used by numeric conversions.
-        /// ³¢ÊÔ»ñÈ¡´Ë GrandInt µÄÎŞ·ûºÅ64 Î»¾ø¶ÔÖµ¡£ÓÃÓÚÊıÖµ×ª»»¡£
+        /// å°è¯•è·å–æ­¤ GrandInt çš„æ— ç¬¦å·64 ä½ç»å¯¹å€¼ã€‚ç”¨äºæ•°å€¼è½¬æ¢ã€‚
         /// </summary>
         private bool TryGetUInt64(out ulong value)
         {
