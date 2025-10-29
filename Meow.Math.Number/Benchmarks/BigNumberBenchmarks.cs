@@ -1,7 +1,9 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Configs;
 using MathX.Number;
 using System;
+using System.IO;
 
 [MemoryDiagnoser]
 public class GrandIntBench
@@ -49,7 +51,43 @@ public class GrandIntBench
     public int HeapAllocated() => a.GetHeapAllocatedSize();
 }
 
+public class FractionBench
+{
+    private BigFraction bf;
+    private double d;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        bf = new BigFraction(new GrandInt(52163), new GrandInt(16604));
+        d = 52163.0 / 16604.0;
+    }
+
+    [Benchmark]
+    public string FractionToString() => bf.ToString();
+
+    [Benchmark]
+    public double FractionToDouble() => bf.ToDouble();
+
+    [Benchmark]
+    public string DoubleToString() => d.ToString();
+
+    [Benchmark]
+    public double DoubleValue() => d;
+}
+
 public class Program
 {
-    public static void Main() => BenchmarkRunner.Run<GrandIntBench>();
+    public static void Main()
+    {
+        // Ensure a consistent artifacts folder at repository root: create _benchmark in current project directory
+        var projectRoot = Directory.GetCurrentDirectory();
+        var artifacts = Path.Combine(projectRoot, "_benchmark");
+        Directory.CreateDirectory(artifacts);
+
+        // Create a config that writes artifacts into the desired folder
+        var config = ManualConfig.Create(DefaultConfig.Instance).WithArtifactsPath(artifacts);
+
+        BenchmarkRunner.Run(new Type[] { typeof(GrandIntBench), typeof(FractionBench) }, config);
+    }
 }

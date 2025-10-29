@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Numerics; // Added for BigInteger support
 
 namespace MathX.Number
 {
@@ -946,6 +947,73 @@ namespace MathX.Number
             // fallback: attempt change via double
             var d = ToDouble(provider);
             return Convert.ChangeType(d, conversionType, provider);
+        }
+
+        /// <summary>
+        /// Convert this GrandInt to System.Numerics.BigInteger (helper for interop).
+        /// 将此 GrandInt 转换为 BigInteger（用于互操作的帮助方法）。
+        /// </summary>
+        public BigInteger ToBigInteger()
+        {
+            var mag = GetMagnitudeBytes();
+            if (mag == null || mag.Length ==0) return BigInteger.Zero;
+            bool msbHigh = (mag[mag.Length -1] &0x80) !=0;
+            byte[] bytes;
+            if (msbHigh)
+            {
+                bytes = new byte[mag.Length +1];
+                Array.Copy(mag,0, bytes,0, mag.Length);
+                bytes[mag.Length] =0x00;
+            }
+            else
+            {
+                bytes = mag;
+            }
+            var bi = new BigInteger(bytes);
+            if (IsNegative) bi = BigInteger.Negate(bi);
+            return bi;
+        }
+
+        /// <summary>
+        /// Create a GrandInt from a BigInteger value.
+        /// 从 BigInteger 创建 GrandInt 的工厂方法。
+        /// </summary>
+        public static GrandInt FromBigInteger(BigInteger bi)
+        {
+            bool neg = bi.Sign <0;
+            var abs = BigInteger.Abs(bi);
+            var tmp = abs.ToByteArray(); // little-endian two's complement for positive abs
+            byte[] mag;
+            if (tmp.Length >1 && tmp[tmp.Length -1] ==0)
+            {
+                mag = new byte[tmp.Length -1];
+                Array.Copy(tmp,0, mag,0, mag.Length);
+            }
+            else
+            {
+                mag = tmp;
+            }
+            if (mag == null || mag.Length ==0) mag = new byte[] {0 };
+            return FromMagnitude(mag, neg);
+        }
+
+        /// <summary>
+        /// Compute GCD of two GrandInt values (returns non-negative GrandInt).
+        ///计算两个 GrandInt 的最大公约数，返回非负 GrandInt。
+        /// </summary>
+        public static GrandInt Gcd(GrandInt x, GrandInt y)
+        {
+            var biX = x.ToBigInteger();
+            var biY = y.ToBigInteger();
+            biX = BigInteger.Abs(biX);
+            biY = BigInteger.Abs(biY);
+            while (biY != BigInteger.Zero)
+            {
+                BigInteger r = biX % biY;
+                biX = biY;
+                biY = r;
+            }
+            return FromBigInteger(biX);
         }
     }
 }
