@@ -13,7 +13,7 @@ namespace MathX.Number
     /// 内部存储：以小端序在 `_data` 中保存幅度字节。符号位保存在 `Flags` 的最低位（0=正，1=负）。
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public sealed class GrandInt : IComparable, IComparable<GrandInt>, IConvertible, IEquatable<GrandInt>, IFormattable
+    public struct GrandInt : IComparable, IComparable<GrandInt>, IConvertible, IEquatable<GrandInt>, IFormattable
     {
         [MarshalAs(UnmanagedType.I4)]
         private int _length; // number of used bytes in _data
@@ -29,19 +29,6 @@ namespace MathX.Number
         private byte[] _data; // little-endian, least-significant byte first
         
         private const byte SignMask = 0x01; //  Sign bit mask (LSB).
-
-        /// <summary>
-        /// Serialization format: [8-byte little-endian ulong length][Flags][data bytes...]<br/>
-        /// 序列化格式： [8 字节小端 ulong 长度][Flags][数据字节...]
-        /// </summary>
-        public GrandInt()
-        {
-            _data = new byte[1];
-            Flags = 0;
-            // initialize magnitude as zero
-            _data[0] = 0;
-            _length = 1;
-        }
 
         /// <summary>
         /// Create from signed64-bit value.<br/>
@@ -186,7 +173,7 @@ namespace MathX.Number
         /// Initialize magnitude from unsigned64-bit value (internal helper).<br/>
         /// 从无符号64 位值初始化幅度（内部使用）。
         /// </summary>
-        /// <param name="v">Unsigned64-bit value / 无符号64 位值</param>
+        /// <param name="v">Unsigned64-bit value / 無符號64 位值</param>
         private void FromUInt64Unchecked(ulong v)
         {
             _length = 0;
@@ -728,7 +715,7 @@ namespace MathX.Number
         /// </summary>
         public static bool TryParse(string s, out GrandInt result)
         {
-            result = null;
+            result = new GrandInt(0);
             if (string.IsNullOrWhiteSpace(s)) return false;
             string t = s.Trim();
             bool neg = false;
@@ -956,14 +943,14 @@ namespace MathX.Number
         public BigInteger ToBigInteger()
         {
             var mag = GetMagnitudeBytes();
-            if (mag == null || mag.Length ==0) return BigInteger.Zero;
-            bool msbHigh = (mag[mag.Length -1] &0x80) !=0;
+            if (mag == null || mag.Length == 0) return BigInteger.Zero;
+            bool msbHigh = (mag[mag.Length - 1] & 0x80) != 0;
             byte[] bytes;
             if (msbHigh)
             {
-                bytes = new byte[mag.Length +1];
-                Array.Copy(mag,0, bytes,0, mag.Length);
-                bytes[mag.Length] =0x00;
+                bytes = new byte[mag.Length + 1];
+                Array.Copy(mag, 0, bytes, 0, mag.Length);
+                bytes[mag.Length] = 0x00;
             }
             else
             {
@@ -980,40 +967,158 @@ namespace MathX.Number
         /// </summary>
         public static GrandInt FromBigInteger(BigInteger bi)
         {
-            bool neg = bi.Sign <0;
+            bool neg = bi.Sign < 0;
             var abs = BigInteger.Abs(bi);
             var tmp = abs.ToByteArray(); // little-endian two's complement for positive abs
             byte[] mag;
-            if (tmp.Length >1 && tmp[tmp.Length -1] ==0)
+            if (tmp.Length > 1 && tmp[tmp.Length - 1] == 0)
             {
-                mag = new byte[tmp.Length -1];
-                Array.Copy(tmp,0, mag,0, mag.Length);
+                mag = new byte[tmp.Length - 1];
+                Array.Copy(tmp, 0, mag, 0, mag.Length);
             }
             else
             {
                 mag = tmp;
             }
-            if (mag == null || mag.Length ==0) mag = new byte[] {0 };
+            if (mag == null || mag.Length == 0) mag = new byte[] { 0 };
             return FromMagnitude(mag, neg);
         }
 
         /// <summary>
-        /// Compute GCD of two GrandInt values (returns non-negative GrandInt).
-        ///计算两个 GrandInt 的最大公约数，返回非负 GrandInt。
+        /// Return absolute value of this GrandInt.
+        /// 返回绝对值（不改变原对象）。
+        /// </summary>
+        public GrandInt Abs()
+        {
+            if (!IsNegative) return this;
+            return FromMagnitude(GetMagnitudeBytes(), false);
+        }
+
+        /// <summary>
+        /// Whether this GrandInt is even.
+        /// </summary>
+        public bool IsEven() => _data == null || _length <= 0 || ((_data[0] & 1) == 0);
+
+        /// <summary>
+        /// Shift left by whole bytes (multiply by256^bytes).
+        /// </summary>
+        public static GrandInt ShiftLeftBytes(GrandInt g, int bytes)
+        {
+            if (bytes <= 0) return g;
+            var mag = g.GetMagnitudeBytes();
+            var nm = new byte[mag.Length + bytes];
+            // little-endian: to multiply by256^bytes, move existing bytes up by 'bytes'
+            Array.Copy(mag, 0, nm, bytes, mag.Length);
+            return FromMagnitude(nm, g.IsNegative);
+        }
+
+        /// <summary>
+        /// Multiply magnitude by a small byte factor (0..255).
+        /// </summary>
+        public GrandInt MultiplyByByte(byte factor)
+        {
+            if (factor == 0) return new GrandInt(0);
+            if (factor == 1) return this;
+            var mag = GetMagnitudeBytes();
+            int len = mag.Length;
+            var res = new byte[len + 1];
+            int carry = 0;
+            for (int i = 0; i < len; i++)
+            {
+                int prod = mag[i] * factor + carry;
+                res[i] = (byte)(prod & 0xFF);
+                carry = prod >> 8;
+            }
+            if (carry != 0) res[len] = (byte)carry;
+            int newLen = res.Length;
+            while (newLen > 1 && res[newLen - 1] == 0) newLen--;
+            var final = new byte[newLen]; Array.Copy(res, 0, final, 0, newLen);
+            return FromMagnitude(final, IsNegative);
+        }
+
+        /// <summary>
+        /// Divide two GrandInt values returning quotient and remainder (remainder >=0).
+        /// Long division on base-256 digits. Remainder is non-negative; quotient sign follows dividend/divisor.
+        /// </summary>
+        public static (GrandInt quotient, GrandInt remainder) DivRem(GrandInt dividend, GrandInt divisor)
+        {
+            if (divisor.IsZero()) throw new DivideByZeroException();
+
+            var a = dividend.Abs();
+            var b = divisor.Abs();
+            // if a < b
+            if (a.CompareTo(b) < 0)
+            {
+                return (new GrandInt(0), FromMagnitude(a.GetMagnitudeBytes(), false));
+            }
+
+            GrandInt quotient = new GrandInt(0);
+            GrandInt remainder = FromMagnitude(a.GetMagnitudeBytes(), false);
+
+            int shift = remainder.Length - b.Length;
+            for (int s = shift; s >= 0; s--)
+            {
+                var bMag = b.GetMagnitudeBytes();
+                var bShiftMag = new byte[bMag.Length + s];
+                Array.Copy(bMag, 0, bShiftMag, s, bMag.Length);
+
+                int cmp = CompareMagnitude(remainder.GetMagnitudeBytes(), remainder.Length, bShiftMag, bShiftMag.Length);
+                if (cmp < 0) continue;
+
+                int low = 1, high = 255, best = 0;
+                while (low <= high)
+                {
+                    int mid = (low + high) >> 1;
+                    var prodMag = MultiplyMagnitude(bShiftMag, bShiftMag.Length, new byte[] { (byte)mid }, 1);
+                    int cmpProd = CompareMagnitude(prodMag, prodMag.Length, remainder.GetMagnitudeBytes(), remainder.Length);
+                    if (cmpProd <= 0)
+                    {
+                        best = mid; low = mid + 1;
+                    }
+                    else
+                    {
+                        high = mid - 1;
+                    }
+                }
+
+                if (best == 0) continue;
+
+                var prodBestMag = MultiplyMagnitude(bShiftMag, bShiftMag.Length, new byte[] { (byte)best }, 1);
+                var prodBest = FromMagnitude(prodBestMag, false);
+                remainder -= prodBest;
+
+                var qPartMag = new byte[s + 1];
+                qPartMag[s] = (byte)best;
+                var qPart = FromMagnitude(qPartMag, false);
+                quotient += qPart;
+            }
+
+            bool qNeg = dividend.IsNegative ^ divisor.IsNegative;
+            if (qNeg && !quotient.IsZero())
+            {
+                var qMag = quotient.GetMagnitudeBytes();
+                quotient = FromMagnitude(qMag, true);
+            }
+
+            // remainder should be non-negative
+            return (quotient, remainder);
+        }
+
+        /// <summary>
+        /// Compute GCD using Euclidean algorithm with GrandInt.DivRem.
+        /// 使用 Euclid 算法基于 GrandInt.DivRem计算 GCD。
         /// </summary>
         public static GrandInt Gcd(GrandInt x, GrandInt y)
         {
-            var biX = x.ToBigInteger();
-            var biY = y.ToBigInteger();
-            biX = BigInteger.Abs(biX);
-            biY = BigInteger.Abs(biY);
-            while (biY != BigInteger.Zero)
+            var a = x.Abs();
+            var b = y.Abs();
+            while (!b.IsZero())
             {
-                BigInteger r = biX % biY;
-                biX = biY;
-                biY = r;
+                var rem = DivRem(a, b).remainder;
+                a = b;
+                b = rem;
             }
-            return FromBigInteger(biX);
+            return a;
         }
     }
 }

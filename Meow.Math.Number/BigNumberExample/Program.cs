@@ -31,6 +31,9 @@ namespace BigNumberExample
             var bigNum = new GrandInt(1234567890123456789L);
             var frac = new BigFraction(bigNum, new GrandInt(7));
             Console.WriteLine($"大分数示例: {frac} -> double: {frac.ToDouble()}");
+
+            var pi = new BigFraction(102928, 32763);
+            Console.WriteLine($"102928/32763 >> 100 = {pi >> 100}");
         }
     }
 }

@@ -167,6 +167,10 @@ namespace MathX.Number
         // Arithmetic operators implemented via BigInteger and converted back to BigFraction
         // -------------------------
 
+        /// <summary>
+        ///计算两个 BigInteger 的最大公约数（非负）。<br/>
+        /// Compute the greatest common divisor (GCD) of two BigInteger values (non-negative).<br/>
+        /// </summary>
         private static BigInteger Gcd(BigInteger x, BigInteger y)
         {
             x = BigInteger.Abs(x);
@@ -312,19 +316,27 @@ namespace MathX.Number
             unchecked
             {
                 int h = 17;
-                h = h * 31 + (Numerator?.GetHashCode() ?? 0);
-                h = h * 31 + (Denominator?.GetHashCode() ?? 0);
+                h = h * 31 + Numerator.GetHashCode();
+                h = h * 31 + Denominator.GetHashCode();
                 return h;
             }
         }
 
         // Conversions helpers between GrandInt and BigInteger
+        /// <summary>
+        /// 将 GrandInt 转换为 System.Numerics.BigInteger（互操作帮助）。<br/>
+        /// Convert a `GrandInt` to `System.Numerics.BigInteger` to assist interop operations.<br/>
+        /// </summary>
         private static BigInteger ToBigInteger(GrandInt g)
         {
             // prefer GrandInt.ToBigInteger if available
             return g.ToBigInteger();
         }
 
+        /// <summary>
+        /// 从 BigInteger 创建 GrandInt 的工厂方法。<br/>
+        /// Create a `GrandInt` from a `BigInteger` value (factory helper).<br/>
+        /// </summary>
         private static GrandInt FromBigInteger(BigInteger bi)
         {
             return GrandInt.FromBigInteger(bi);
@@ -388,36 +400,52 @@ namespace MathX.Number
         /// </summary>
         public TypeCode GetTypeCode() => TypeCode.Object;
 
+        /// <inheritdoc/>
         public bool ToBoolean(IFormatProvider provider) => !IsZero;
 
+        /// <inheritdoc/>
         public char ToChar(IFormatProvider provider) => Convert.ToChar(ToInt32(provider));
 
+        /// <inheritdoc/>
         public sbyte ToSByte(IFormatProvider provider) => Convert.ToSByte(ToInt32(provider));
 
+        /// <inheritdoc/>
         public byte ToByte(IFormatProvider provider) => Convert.ToByte(ToDouble(provider));
 
+        /// <inheritdoc/>
         public short ToInt16(IFormatProvider provider) => Convert.ToInt16(ToDouble(provider));
 
+        /// <inheritdoc/>
         public ushort ToUInt16(IFormatProvider provider) => Convert.ToUInt16(ToDouble(provider));
 
+        /// <inheritdoc/>
         public int ToInt32(IFormatProvider provider) => Convert.ToInt32(ToDouble(provider));
 
+        /// <inheritdoc/>
         public uint ToUInt32(IFormatProvider provider) => Convert.ToUInt32(ToDouble(provider));
 
+        /// <inheritdoc/>
         public long ToInt64(IFormatProvider provider) => Convert.ToInt64(ToDouble(provider));
 
+        /// <inheritdoc/>
         public ulong ToUInt64(IFormatProvider provider) => Convert.ToUInt64(ToDouble(provider));
 
+        /// <inheritdoc/>
         public float ToSingle(IFormatProvider provider) => (float)ToDouble(provider);
 
+        /// <inheritdoc/>
         public double ToDouble(IFormatProvider provider) => ToDouble();
 
+        /// <inheritdoc/>
         public decimal ToDecimal(IFormatProvider provider) => Convert.ToDecimal(ToDouble(provider));
 
+        /// <inheritdoc/>
         public DateTime ToDateTime(IFormatProvider provider) => throw new InvalidCastException();
 
+        /// <inheritdoc/>
         public string ToString(IFormatProvider provider) => ToString();
 
+        /// <inheritdoc/>
         public object ToType(Type conversionType, IFormatProvider provider)
         {
             if (conversionType == typeof(string)) return ToString(provider);
@@ -445,7 +473,7 @@ namespace MathX.Number
             if (den.IsZero) throw new DivideByZeroException();
 
             BigInteger q = BigInteger.DivRem(num, den, out BigInteger rem);
-            bool negative = q.Sign < 0 || (q.IsZero && num.Sign < 0);
+            // bool negative = q.Sign < 0 || (q.IsZero && num.Sign < 0);
             // For decimal expansion, work with absolute remainder
             rem = BigInteger.Abs(rem);
             den = BigInteger.Abs(den);
@@ -453,21 +481,21 @@ namespace MathX.Number
             var sb = new System.Text.StringBuilder(digits);
             for (int i = 0; i < digits; i++)
             {
-                rem *=10;
+                rem *= 10;
                 BigInteger digit = BigInteger.DivRem(rem, den, out BigInteger newRem);
                 sb.Append((char)('0' + (int)digit));
                 rem = newRem;
                 if (rem.IsZero)
                 {
                     // fill remaining with zeros
-                    for (int j = i +1; j < digits; j++) sb.Append('0');
+                    for (int j = i + 1; j < digits; j++) sb.Append('0');
                     break;
                 }
             }
 
             var intPart = FromBigInteger(q);
             // ensure intPart sign matches negative if q==0
-            if (q.IsZero && num.Sign <0) intPart = FromBigInteger(BigInteger.Zero) ;
+            if (q.IsZero && num.Sign < 0) intPart = FromBigInteger(BigInteger.Zero) ;
 
             return (intPart, sb.ToString());
         }
