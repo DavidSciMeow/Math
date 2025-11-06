@@ -1,31 +1,32 @@
-using System;
+ï»¿using System;
 using System.Numerics;
 
 namespace MathX.Number
 {
     /// <summary>
-    /// ÓĞÀíÊı£¨·ÖÊı£©ÊµÏÖ£¬Ê¹ÓÃ `GrandInt`×÷Îª·Ö×ÓÓë·ÖÄ¸¡£<br/>
+    /// æœ‰ç†æ•°ï¼ˆåˆ†æ•°ï¼‰å®ç°ï¼Œä½¿ç”¨ `GrandInt`ä½œä¸ºåˆ†å­ä¸åˆ†æ¯ã€‚<br/>
     /// Represents a rational number as a fraction (numerator/denominator) backed by `GrandInt`.<br/>
     /// </summary>
     public readonly struct BigFraction : IEquatable<BigFraction>, IComparable<BigFraction>, IComparable, IConvertible, IFormattable
     {
         /// <summary>
-        /// ·Ö×Ó¡£<br/>
+        /// åˆ†å­ã€‚<br/>
         /// Numerator.<br/>
         /// </summary>
         public GrandInt Numerator { get; }
+
         /// <summary>
-        /// ·ÖÄ¸£¨Ê¼ÖÕÎªÕı£©¡£<br/>
+        /// åˆ†æ¯ï¼ˆå§‹ç»ˆä¸ºæ­£ï¼‰ã€‚<br/>
         /// Denominator (always positive).<br/>
         /// </summary>
         public GrandInt Denominator { get; }
 
         /// <summary>
-        /// ¹¹ÔìÒ»¸ö·ÖÊı£¨»á½øĞĞÔ¼·Ö²¢±£Ö¤·ÖÄ¸ÎªÕı£©¡£<br/>
+        /// æ„é€ ä¸€ä¸ªåˆ†æ•°ï¼ˆä¼šè¿›è¡Œçº¦åˆ†å¹¶ä¿è¯åˆ†æ¯ä¸ºæ­£ï¼‰ã€‚<br/>
         /// Construct a fraction (will be reduced and denominator normalized to positive).<br/>
         /// </summary>
-        /// <param name="num">·Ö×Ó / numerator</param>
-        /// <param name="den">·ÖÄ¸ / denominator (must be non-zero)</param>
+        /// <param name="num">åˆ†å­ / numerator</param>
+        /// <param name="den">åˆ†æ¯ / denominator (must be non-zero)</param>
         public BigFraction(GrandInt num, GrandInt den)
         {
             if (den.IsZero()) throw new DivideByZeroException("Denominator cannot be zero.");
@@ -67,25 +68,25 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// ´ÓÕûÊı´´½¨·ÖÊı£¨·ÖÄ¸ =1£©¡£<br/>
+        /// ä»æ•´æ•°åˆ›å»ºåˆ†æ•°ï¼ˆåˆ†æ¯ =1ï¼‰ã€‚<br/>
         /// Create from integer value (denominator =1).<br/>
         /// </summary>
         public BigFraction(GrandInt integer) : this(integer, new GrandInt(1)) { }
 
         /// <summary>
-        /// ÊÇ·ñÎªÁã¡£<br/>
+        /// æ˜¯å¦ä¸ºé›¶ã€‚<br/>
         /// Whether the fraction equals zero.<br/>
         /// </summary>
         public bool IsZero => Numerator.IsZero();
 
         /// <summary>
-        /// ÊÇ·ñÎªÕûÊı£¨·ÖÄ¸Îª1£©¡£<br/>
+        /// æ˜¯å¦ä¸ºæ•´æ•°ï¼ˆåˆ†æ¯ä¸º1ï¼‰ã€‚<br/>
         /// Whether the fraction is an integer (denominator ==1).<br/>
         /// </summary>
         public bool IsInteger => Denominator.Length == 1 && Denominator.GetMagnitudeBytes()[0] == 1;
 
         /// <summary>
-        /// Ó³ÉäÎª double£¨¿ÉÄÜ¶ªÊ§¾«¶È£©¡£<br/>
+        /// æ˜ å°„ä¸º doubleï¼ˆå¯èƒ½ä¸¢å¤±ç²¾åº¦ï¼‰ã€‚<br/>
         /// Map to double (may lose precision).<br/>
         /// </summary>
         public double ToDouble()
@@ -97,7 +98,7 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// Ó³ÉäÎª float£¨¿ÉÄÜ¶ªÊ§¾«¶È£©¡£<br/>
+        /// æ˜ å°„ä¸º floatï¼ˆå¯èƒ½ä¸¢å¤±ç²¾åº¦ï¼‰ã€‚<br/>
         /// Map to float (may lose precision).<br/>
         /// </summary>
         public float ToSingle()
@@ -106,7 +107,7 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// ×ªÎª×Ö·û´®±íÊ¾¡£ÈôÎªÕûÊıÔòÖ»Êä³öÕûÊı£¬·ñÔòÊä³ö `numerator/denominator`¡£<br/>
+        /// è½¬ä¸ºå­—ç¬¦ä¸²è¡¨ç¤ºã€‚è‹¥ä¸ºæ•´æ•°åˆ™åªè¾“å‡ºæ•´æ•°ï¼Œå¦åˆ™è¾“å‡º `numerator/denominator`ã€‚<br/>
         /// Convert to string. If integer, output integer only; otherwise output `numerator/denominator`.<br/>
         /// </summary>
         public override string ToString()
@@ -117,7 +118,7 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// ´Ó double ´´½¨¾«È··ÖÊı£¨»ùÓÚ IEEE754 ±íÊ¾£©¡£<br/>
+        /// ä» double åˆ›å»ºç²¾ç¡®åˆ†æ•°ï¼ˆåŸºäº IEEE754 è¡¨ç¤ºï¼‰ã€‚<br/>
         /// Create an exact fraction from a double (based on IEEE754 representation).<br/>
         /// </summary>
         public static BigFraction FromDouble(double d)
@@ -163,12 +164,8 @@ namespace MathX.Number
             return new BigFraction(num, den);
         }
 
-        // -------------------------
-        // Arithmetic operators implemented via BigInteger and converted back to BigFraction
-        // -------------------------
-
         /// <summary>
-        ///¼ÆËãÁ½¸ö BigInteger µÄ×î´ó¹«Ô¼Êı£¨·Ç¸º£©¡£<br/>
+        ///è®¡ç®—ä¸¤ä¸ª BigInteger çš„æœ€å¤§å…¬çº¦æ•°ï¼ˆéè´Ÿï¼‰ã€‚<br/>
         /// Compute the greatest common divisor (GCD) of two BigInteger values (non-negative).<br/>
         /// </summary>
         private static BigInteger Gcd(BigInteger x, BigInteger y)
@@ -185,7 +182,7 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// Á½¸ö·ÖÊıÏà¼Ó²¢·µ»ØĞÂ·ÖÊı¡£<br/>
+        /// ä¸¤ä¸ªåˆ†æ•°ç›¸åŠ å¹¶è¿”å›æ–°åˆ†æ•°ã€‚<br/>
         /// Adds two BigFraction values and returns their sum as a new BigFraction.<br/>
         /// </summary>
         public static BigFraction operator +(BigFraction a, BigFraction b)
@@ -206,7 +203,7 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// Á½¸ö·ÖÊıÏà¼õ²¢·µ»ØĞÂ·ÖÊı¡£<br/>
+        /// ä¸¤ä¸ªåˆ†æ•°ç›¸å‡å¹¶è¿”å›æ–°åˆ†æ•°ã€‚<br/>
         /// Subtracts one BigFraction from another and returns the result as a new BigFraction.<br/>
         /// </summary>
         public static BigFraction operator -(BigFraction a, BigFraction b)
@@ -224,7 +221,7 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// Á½¸ö·ÖÊıÏà³Ë²¢·µ»ØĞÂ·ÖÊı¡£<br/>
+        /// ä¸¤ä¸ªåˆ†æ•°ç›¸ä¹˜å¹¶è¿”å›æ–°åˆ†æ•°ã€‚<br/>
         /// Multiplies two BigFraction values and returns the result as a new BigFraction.<br/>
         /// </summary>
         public static BigFraction operator *(BigFraction a, BigFraction b)
@@ -252,7 +249,7 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// Á½¸ö·ÖÊıÏà³ı²¢·µ»ØĞÂ·ÖÊı¡£<br/>
+        /// ä¸¤ä¸ªåˆ†æ•°ç›¸é™¤å¹¶è¿”å›æ–°åˆ†æ•°ã€‚<br/>
         /// Divides one BigFraction value by another and returns the result as a new BigFraction.<br/>
         /// </summary>
         public static BigFraction operator /(BigFraction a, BigFraction b)
@@ -282,18 +279,18 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// ÅĞ¶ÏÏàµÈ£¨ÖµÏàµÈ£©£¬ÊÊÓÃÓÚ == ÔËËã·û¡£<br/>
+        /// åˆ¤æ–­ç›¸ç­‰ï¼ˆå€¼ç›¸ç­‰ï¼‰ï¼Œé€‚ç”¨äº == è¿ç®—ç¬¦ã€‚<br/>
         /// Determines whether two BigFraction instances represent the same numeric value.<br/>
         /// </summary>
         public static bool operator ==(BigFraction a, BigFraction b) => a.Equals(b);
         /// <summary>
-        /// ÅĞ¶Ï²»µÈ¡£<br/>
+        /// åˆ¤æ–­ä¸ç­‰ã€‚<br/>
         /// Determines whether two BigFraction instances are not equal.<br/>
         /// </summary>
         public static bool operator !=(BigFraction a, BigFraction b) => !a.Equals(b);
 
         /// <summary>
-        /// ÅĞ¶ÏÓëÁíÒ»¸ö·ÖÊıÊÇ·ñÏàµÈ£¨ÒÑ¹æ·¶»¯ºóÖ±½Ó±È½Ï·Ö×ÓÓë·ÖÄ¸£©¡£<br/>
+        /// åˆ¤æ–­ä¸å¦ä¸€ä¸ªåˆ†æ•°æ˜¯å¦ç›¸ç­‰ï¼ˆå·²è§„èŒƒåŒ–åç›´æ¥æ¯”è¾ƒåˆ†å­ä¸åˆ†æ¯ï¼‰ã€‚<br/>
         /// Determines whether the current BigFraction instance is equal to the specified BigFraction value.<br/>
         /// </summary>
         public bool Equals(BigFraction other)
@@ -303,12 +300,12 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// ¸²¸Ç Object.Equals¡£<br/>
+        /// è¦†ç›– Object.Equalsã€‚<br/>
         /// Overrides Object.Equals.<br/>
         /// </summary>
         public override bool Equals(object obj) => obj is BigFraction bf && Equals(bf);
         /// <summary>
-        /// ·µ»Ø¹şÏ£Âë£¬»ùÓÚ·Ö×ÓÓë·ÖÄ¸¡£<br/>
+        /// è¿”å›å“ˆå¸Œç ï¼ŒåŸºäºåˆ†å­ä¸åˆ†æ¯ã€‚<br/>
         /// Serves as the default hash function for the object (based on numerator and denominator).<br/>
         /// </summary>
         public override int GetHashCode()
@@ -322,9 +319,8 @@ namespace MathX.Number
             }
         }
 
-        // Conversions helpers between GrandInt and BigInteger
         /// <summary>
-        /// ½« GrandInt ×ª»»Îª System.Numerics.BigInteger£¨»¥²Ù×÷°ïÖú£©¡£<br/>
+        /// å°† GrandInt è½¬æ¢ä¸º System.Numerics.BigIntegerï¼ˆäº’æ“ä½œå¸®åŠ©ï¼‰ã€‚<br/>
         /// Convert a `GrandInt` to `System.Numerics.BigInteger` to assist interop operations.<br/>
         /// </summary>
         private static BigInteger ToBigInteger(GrandInt g)
@@ -334,7 +330,7 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// ´Ó BigInteger ´´½¨ GrandInt µÄ¹¤³§·½·¨¡£<br/>
+        /// ä» BigInteger åˆ›å»º GrandInt çš„å·¥å‚æ–¹æ³•ã€‚<br/>
         /// Create a `GrandInt` from a `BigInteger` value (factory helper).<br/>
         /// </summary>
         private static GrandInt FromBigInteger(BigInteger bi)
@@ -342,11 +338,8 @@ namespace MathX.Number
             return GrandInt.FromBigInteger(bi);
         }
 
-        // -------------------------
-        // IComparable and IFormattable
-        // -------------------------
         /// <summary>
-        /// ½«µ±Ç°·ÖÊıÓëÁíÒ»¸ö·ÖÊı±È½Ï£¬·µ»ØĞ¡ÓÚ0¡¢µÈÓÚ0»ò´óÓÚ0µÄÖµ¡£<br/>
+        /// å°†å½“å‰åˆ†æ•°ä¸å¦ä¸€ä¸ªåˆ†æ•°æ¯”è¾ƒï¼Œè¿”å›å°äº0ã€ç­‰äº0æˆ–å¤§äº0çš„å€¼ã€‚<br/>
         /// Compare this fraction with another; returns less than0,0, or greater than0.
         /// </summary>
         public int CompareTo(BigFraction other)
@@ -362,15 +355,17 @@ namespace MathX.Number
             return left.CompareTo(right);
         }
 
+        /// <inheritdoc/>
         int IComparable.CompareTo(object obj)
         {
             if (obj == null) return 1;
             if (!(obj is BigFraction)) throw new ArgumentException("Object must be BigFraction");
             return CompareTo((BigFraction)obj);
+        /// <inheritdoc/>
         }
 
         /// <summary>
-        /// Ê¹ÓÃ¸ñÊ½»¯×Ö·û´®½øĞĞ¸ñÊ½»¯¡£<br/>
+        /// ä½¿ç”¨æ ¼å¼åŒ–å­—ç¬¦ä¸²è¿›è¡Œæ ¼å¼åŒ–ã€‚<br/>
         /// Format using IFormattable contract.<br/>
         /// </summary>
         public string ToString(string format, IFormatProvider formatProvider)
@@ -391,11 +386,8 @@ namespace MathX.Number
             }
         }
 
-        // -------------------------
-        // IConvertible
-        // -------------------------
         /// <summary>
-        /// »ñÈ¡ TypeCode¡£<br/>
+        /// è·å– TypeCodeã€‚<br/>
         /// Get the TypeCode.
         /// </summary>
         public TypeCode GetTypeCode() => TypeCode.Object;
@@ -457,13 +449,10 @@ namespace MathX.Number
             return Convert.ChangeType(d, conversionType, provider);
         }
 
-        // -------------------------
-        // New display operators: >> (decimal digits), ~ (int part + remainder), ! (fraction string)
-        // -------------------------
         /// <summary>
-        ///¼ÆËã²¢·µ»ØÕûÊı²¿·ÖÓëÖ¸¶¨Î»ÊıµÄĞ¡Êı£¨×÷Îª×Ö·û´®£¬±£ÁôÇ°µ¼Áã£©¡£<br/>
+        ///è®¡ç®—å¹¶è¿”å›æ•´æ•°éƒ¨åˆ†ä¸æŒ‡å®šä½æ•°çš„å°æ•°ï¼ˆä½œä¸ºå­—ç¬¦ä¸²ï¼Œä¿ç•™å‰å¯¼é›¶ï¼‰ã€‚<br/>
         /// Compute and return integer part and the requested number of decimal digits (string, preserves leading zeros).<br/>
-        ///Àı: (52163/16604) >>20 -> (3, "14159238737653577451")
+        ///ä¾‹: (52163/16604) >>20 -> (3, "14159238737653577451")
         /// </summary>
         public static (GrandInt, string) operator >>(BigFraction a, int digits)
         {
@@ -501,9 +490,9 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// ·µ»Ø (ÕûÊı²¿·Ö,ÓàÊı·ÖÊı) µÄ±íÊ¾£¬ÓàÊıÎª²»´óÓÚ1µÄ·ÖÊı¡£<br/>
+        /// è¿”å› (æ•´æ•°éƒ¨åˆ†,ä½™æ•°åˆ†æ•°) çš„è¡¨ç¤ºï¼Œä½™æ•°ä¸ºä¸å¤§äº1çš„åˆ†æ•°ã€‚<br/>
         /// Return (integer part, remainder fraction) where remainder less than 1.
-        /// Àı: ~ (52163/16604) -> (3, "2351 /16604")
+        /// ä¾‹: ~ (52163/16604) -> (3, "2351 /16604")
         /// </summary>
         public static (GrandInt, string) operator ~(BigFraction a)
         {
@@ -520,7 +509,7 @@ namespace MathX.Number
         }
 
         /// <summary>
-        /// ·µ»Ø·ÖÊ½×ÔÉíµÄ "numerator / denominator" ×Ö·û´®±íÊ¾¡£<br/>
+        /// è¿”å›åˆ†å¼è‡ªèº«çš„ "numerator / denominator" å­—ç¬¦ä¸²è¡¨ç¤ºã€‚<br/>
         /// Return the fraction as a "numerator / denominator" string.
         /// </summary>
         public static string operator !(BigFraction a)

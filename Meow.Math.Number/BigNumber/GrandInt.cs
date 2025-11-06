@@ -18,7 +18,6 @@ namespace MathX.Number
         [MarshalAs(UnmanagedType.I4)]
         private int _length; // number of used bytes in _data
         /// <summary>
-        /// 
         /// Flags byte: LSB used as sign indicator (0 = positive,1 = negative).<br/>
         /// 标志字节：最低位作为符号指示（0 = 正，1 =负）。
         /// Other bits reserved for future use. /其他位保留以备将来使用。
@@ -82,7 +81,6 @@ namespace MathX.Number
             if (isNegative) Flags |= SignMask;
         }
 
-        // --- internal helpers ---
         /// <summary>
         /// Ensure internal buffer has at least `size` capacity.<br/>
         /// 确保内部缓冲区至少拥有 `size` 大小的容量。
