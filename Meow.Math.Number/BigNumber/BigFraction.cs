@@ -361,7 +361,6 @@ namespace MathX.Number
             if (obj == null) return 1;
             if (!(obj is BigFraction)) throw new ArgumentException("Object must be BigFraction");
             return CompareTo((BigFraction)obj);
-        /// <inheritdoc/>
         }
 
         /// <summary>

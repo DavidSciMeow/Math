@@ -2,8 +2,35 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>7.3</LangVersion>
-    <RootNamespace>MathX.Number</RootNamespace>
+    <RootNamespace>MathX</RootNamespace>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <AssemblyName>Electronicute.MathX.Numbers</AssemblyName>
+    <AssemblyTitle>Numbers</AssemblyTitle>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>Electroincute.MathX.Numbers</PackageId>
+    <Title>MathX.Numbers</Title>
+    <Version>1.0.0</Version>
+    <Authors>DavidSciMeow</Authors>
+    <Company>Electronicute</Company>
+    <Product>MathX.Numbers</Product>
+    <Description>its a bignumber lib
+ with grandint and bigfraction</Description>
+    <Copyright>@2025 Electronicute</Copyright>
+    <PackageProjectUrl>https://github.com/DavidSciMeow/Math</PackageProjectUrl>
+    <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/DavidSciMeow/Math</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>math, grandint, fraction, number</PackageTags>
+    <PackAsTool>False</PackAsTool>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\ReadMe.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 </Project>
