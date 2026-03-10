@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -8,26 +8,26 @@ using GraphX.Util;
 namespace GraphX.Algorithms
 {
     /// <summary>
-    /// ¾²Ì¬Í¼Ëã·¨¼¯£¨ÒÔ `IGraph` µÄÀ©Õ¹·½·¨ĞÎÊ½Ìá¹©£©¡£<br/>Static graph algorithms provided as extension methods for IGraph.
+    /// é™æ€å›¾ç®—æ³•é›†ï¼ˆä»¥ `IGraph` çš„æ‰©å±•æ–¹æ³•å½¢å¼æä¾›ï¼‰ã€‚<br/>Static graph algorithms provided as extension methods for IGraph.
     /// </summary>
     public static class GraphMethods
     {
         /// <summary>
-        /// Dijkstra ×î¶ÌÂ·¾¶£¨À©Õ¹·½·¨£©£¬·µ»Ø `PathResult`¡£Ö§³Ö `CancellationToken` ÒÔÈ¡Ïû³¤Ê±¼äËÑË÷¡£<br/>Dijkstra shortest path as an extension method. Returns PathResult. Supports CancellationToken to cancel long-running searches.
+        /// Dijkstra æœ€çŸ­è·¯å¾„ï¼ˆæ‰©å±•æ–¹æ³•ï¼‰ï¼Œè¿”å› `PathResult`ã€‚æ”¯æŒ `CancellationToken` ä»¥å–æ¶ˆé•¿æ—¶é—´æœç´¢ã€‚<br/>Dijkstra shortest path as an extension method. Returns PathResult. Supports CancellationToken to cancel long-running searches.
         /// </summary>
         public static PathResult<NodeType, TWeight> Dijkstra<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, NodeType start, NodeType end, IWeightOperator<TWeight> op, bool includeNodeWeight, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
             where TWeight : IComparable<TWeight>
         {
-            // ÏÈ¾öÌõ¼ş£ºDijkstra ÒªÇó±ßÈ¨·Ç¸º / Precondition: Dijkstra requires non-negative edge weights
+            // å…ˆå†³æ¡ä»¶ï¼šDijkstra è¦æ±‚è¾¹æƒéè´Ÿ / Precondition: Dijkstra requires non-negative edge weights
             bool _dijkstraHasNegative = false;
-            foreach (var _e in graph.WeightedEdges)
+            foreach (var (U, V, W) in graph.WeightedEdges)
             {
-                if (op.Compare(_e.W, op.Zero) < 0) { _dijkstraHasNegative = true; break; }
+                if (op.Compare(W, op.Zero) < 0) { _dijkstraHasNegative = true; break; }
             }
             if (_dijkstraHasNegative)
             {
-                throw new GraphX.Error.GraphMethodNotApplicableException("Dijkstra", "Graph contains negative edge weights; Dijkstra requires non-negative weights.", $"directed={graph.IsDirected}, negativeEdges=true");
+                throw new Error.GraphMethodNotApplicableException("Dijkstra", "Graph contains negative edge weights; Dijkstra requires non-negative weights.", $"directed={graph.IsDirected}, negativeEdges=true");
             }
 
             var result = new PathResult<NodeType, TWeight>();
@@ -37,10 +37,10 @@ namespace GraphX.Algorithms
 
             var heap = new BinaryHeap<TWeight, NodeType>(delegate (TWeight a, TWeight b) { return op.Compare(a, b); });
 
-            // ´Ó±ß¿ìÕÕ³õÊ¼»¯½Úµã¼¯ºÏ / initialize nodes from edges
+            // ä»è¾¹å¿«ç…§åˆå§‹åŒ–èŠ‚ç‚¹é›†åˆ / initialize nodes from edges
             var edges = graph.WeightedEdges.ToList();
             var nodes = new HashSet<NodeType>();
-            foreach (var e in edges) { nodes.Add(e.U); nodes.Add(e.V); }
+            foreach (var (U, V, W) in edges) { nodes.Add(U); nodes.Add(V); }
 
             foreach (var n in nodes) dist[n] = op.Infinity;
             if (!dist.ContainsKey(start)) dist[start] = op.Zero;
@@ -51,9 +51,9 @@ namespace GraphX.Algorithms
             {
                 ct.ThrowIfCancellationRequested();
 
-                var pr = heap.DequeueMin();
-                var u = pr.item;
-                if (op.Compare(pr.priority, dist[u]) > 0) continue;
+                var (priority, item) = heap.DequeueMin();
+                var u = item;
+                if (op.Compare(priority, dist[u]) > 0) continue;
                 if (u.Equals(end)) break;
 
                 foreach (var nb in graph.GetNeighbors(u))
@@ -86,13 +86,13 @@ namespace GraphX.Algorithms
         }
 
         /// <summary>
-        /// Bellman-Ford À©Õ¹·½·¨£¬·µ»Ø (dist, prev)¡£Èô¼ì²âµ½¸º»·ÔòÅ×³ö `BFANWCDetectedException`¡£Ö§³ÖÈ¡Ïû¡£<br/>Bellman-Ford extension method. Returns (dist, prev). Throws BFANWCDetectedException on negative cycles. Supports cancellation.
+        /// Bellman-Ford æ‰©å±•æ–¹æ³•ï¼Œè¿”å› (dist, prev)ã€‚è‹¥æ£€æµ‹åˆ°è´Ÿç¯åˆ™æŠ›å‡º `BFANWCDetectedException`ã€‚æ”¯æŒå–æ¶ˆã€‚<br/>Bellman-Ford extension method. Returns (dist, prev). Throws BFANWCDetectedException on negative cycles. Supports cancellation.
         /// </summary>
         public static Tuple<Dictionary<NodeType, TWeight>, Dictionary<NodeType, NodeType>> BellmanFord<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, NodeType start, IWeightOperator<TWeight> op, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
             where TWeight : IComparable<TWeight>
         {
-            // ´ÓÁÚ½Ó¹¹Ôì½ÚµãºÍÓĞÏò±ß¿ìÕÕ£¬È·±£ÔÚÎŞÏòÍ¼ÖĞÒ²ÄÜÕıÈ·ËÉ³Ú / Build nodes and directed-edge snapshot to ensure proper relaxation for undirected graphs
+            // ä»é‚»æ¥æ„é€ èŠ‚ç‚¹å’Œæœ‰å‘è¾¹å¿«ç…§ï¼Œç¡®ä¿åœ¨æ— å‘å›¾ä¸­ä¹Ÿèƒ½æ­£ç¡®æ¾å¼› / Build nodes and directed-edge snapshot to ensure proper relaxation for undirected graphs
             var nodes = new HashSet<NodeType>(graph.Nodes);
             var edges = new List<(NodeType U, NodeType V, TWeight W)>();
             foreach (var u in nodes)
@@ -116,11 +116,11 @@ namespace GraphX.Algorithms
                 ct.ThrowIfCancellationRequested();
 
                 bool updated = false;
-                foreach (var e in edges)
+                foreach (var (U, V, W) in edges)
                 {
                     ct.ThrowIfCancellationRequested();
 
-                    var u = e.U; var v = e.V; var w = e.W;
+                    var u = U; var v = V; var w = W;
                     if (op.Compare(dist[u], op.Infinity) == 0) continue;
                     var nd = op.Add(dist[u], w);
                     if (op.Compare(nd, dist[v]) < 0)
@@ -133,133 +133,130 @@ namespace GraphX.Algorithms
                 if (!updated) break;
             }
 
-            // ¸º»·¼ì²â / negative cycle detection
+            // è´Ÿç¯æ£€æµ‹ / negative cycle detection
             var neg = new List<Tuple<NodeType, NodeType, TWeight>>();
-            foreach (var e in edges)
-            { 
+            foreach (var (U, V, W) in edges)
+            {
                 ct.ThrowIfCancellationRequested();
 
-                var u = e.U; var v = e.V; var w = e.W;
+                var u = U; var v = V; var w = W;
                 if (op.Compare(dist[u], op.Infinity) == 0) continue;
                 var nd = op.Add(dist[u], w);
-                if (op.Compare(nd, dist[v]) < 0) neg.Add(Tuple.Create(u, v, w));
+                if (op.Compare(nd, dist[v]) < 0) neg.Add(new(u, v, w));
             }
-            if (neg.Count > 0) throw new GraphX.Error.BFANWCDetectedException();
-            return Tuple.Create(dist, prev);
+            if (neg.Count > 0) throw new Error.BFANWCDetectedException();
+            return new(dist, prev);
         }
 
         /// <summary>
-        /// Kruskal ×îĞ¡Éú³ÉÊ÷£¨À©Õ¹·½·¨£©£¬·µ»Ø MST µÄ±ßÁĞ±í¡£½öÊÊÓÃÓÚÎŞÏòÍ¼¡£<br/>Kruskal minimum spanning tree as an extension method; returns list of edges in the MST. Only for undirected graphs.
+        /// Kruskal æœ€å°ç”Ÿæˆæ ‘ï¼ˆæ‰©å±•æ–¹æ³•ï¼‰ï¼Œè¿”å› MST çš„è¾¹åˆ—è¡¨ã€‚ä»…é€‚ç”¨äºæ— å‘å›¾ã€‚<br/>Kruskal minimum spanning tree as an extension method; returns list of edges in the MST. Only for undirected graphs.
         /// </summary>
-        public static List<Tuple<NodeType, NodeType, TWeight>> Kruskal<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, IComparer<TWeight> weightComparer = null)
+        public static List<Tuple<NodeType, NodeType, TWeight>> Kruskal<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, IComparer<TWeight>? weightComparer = null)
             where NodeType : IEquatable<NodeType>
             where TWeight : IComparable<TWeight>
         {
-            // Kruskal ½öÊÊÓÃÓÚÎŞÏòÍ¼£»ÔÚÓĞÏòÍ¼ÉÏ¸Ã¸ÅÄî²»Ã÷È· / Kruskal is defined for undirected graphs; for directed graphs the notion is ambiguous
-            if (graph.IsDirected) throw new GraphX.Error.GraphMethodNotApplicableException("Kruskal", "Kruskal requires an undirected graph.", $"directed={graph.IsDirected}");
-             // »ñÈ¡±ßµÄ¿ìÕÕ / Take snapshot of edges
-             var edges = graph.WeightedEdges.ToList();
-             // ¶ÔÎŞÏòÍ¼±ß¿ÉÄÜÒÑ°´¹æ·¶ĞÎÊ½´æ´¢ / For undirected graphs edges may be canonical
-             // °´È¨ÖØÅÅĞò / Sort edges by weight
-             if (weightComparer == null)
-             {
-                 weightComparer = Comparer<TWeight>.Default;
-             }
+            // Kruskal ä»…é€‚ç”¨äºæ— å‘å›¾ï¼›åœ¨æœ‰å‘å›¾ä¸Šè¯¥æ¦‚å¿µä¸æ˜ç¡® / Kruskal is defined for undirected graphs; for directed graphs the notion is ambiguous
+            if (graph.IsDirected) throw new Error.GraphMethodNotApplicableException("Kruskal", "Kruskal requires an undirected graph.", $"directed={graph.IsDirected}");
+            // è·å–è¾¹çš„å¿«ç…§ / Take snapshot of edges
+            var edges = graph.WeightedEdges.ToList();
+            // å¯¹æ— å‘å›¾è¾¹å¯èƒ½å·²æŒ‰è§„èŒƒå½¢å¼å­˜å‚¨ / For undirected graphs edges may be canonical
+            // æŒ‰æƒé‡æ’åº / Sort edges by weight
+            weightComparer ??= Comparer<TWeight>.Default;
 
-             edges.Sort((a, b) => weightComparer.Compare(a.W, b.W));
+            edges.Sort((a, b) => weightComparer.Compare(a.W, b.W));
 
-             var uf = new UnionFind<NodeType>();
-             var nodes = new HashSet<NodeType>();
-             foreach (var e in edges) { nodes.Add(e.U); nodes.Add(e.V); }
-             foreach (var n in nodes) uf.MakeSet(n);
+            var uf = new UnionFind<NodeType>();
+            var nodes = new HashSet<NodeType>();
+            foreach (var (U, V, W) in edges) { nodes.Add(U); nodes.Add(V); }
+            foreach (var n in nodes) uf.MakeSet(n);
 
-             var mst = new List<Tuple<NodeType, NodeType, TWeight>>();
-             foreach (var e in edges)
-             {
-                 var u = e.U; var v = e.V; var w = e.W;
-                 if (!EqualityComparer<NodeType>.Default.Equals(uf.Find(u), uf.Find(v)))
-                 {
-                     uf.Union(u, v);
-                     mst.Add(Tuple.Create(u, v, w));
-                 }
-             }
+            var mst = new List<Tuple<NodeType, NodeType, TWeight>>();
+            foreach (var (U, V, W) in edges)
+            {
+                var u = U; var v = V; var w = W;
+                if (!EqualityComparer<NodeType>.Default.Equals(uf.Find(u), uf.Find(v)))
+                {
+                    uf.Union(u, v);
+                    mst.Add(new(u, v, w));
+                }
+            }
 
-             return mst;
+            return mst;
         }
 
         /// <summary>
-        /// Prim Ëã·¨¹¹Ôì×îĞ¡Éú³ÉÊ÷£¨´ÓÖ¸¶¨Æğµã£©¡£ÈôÍ¼²»Á¬Í¨£¬½ö·µ»Ø¸ÃÁ¬Í¨·ÖÁ¿µÄ MST¡£<br/>Prim's algorithm to build a minimum spanning tree starting from a given node. If graph is disconnected returns MST for the connected component.
+        /// Prim ç®—æ³•æ„é€ æœ€å°ç”Ÿæˆæ ‘ï¼ˆä»æŒ‡å®šèµ·ç‚¹ï¼‰ã€‚è‹¥å›¾ä¸è¿é€šï¼Œä»…è¿”å›è¯¥è¿é€šåˆ†é‡çš„ MSTã€‚<br/>Prim's algorithm to build a minimum spanning tree starting from a given node. If graph is disconnected returns MST for the connected component.
         /// </summary>
-        public static List<Tuple<NodeType, NodeType, TWeight>> Prim<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, NodeType start, IComparer<TWeight> weightComparer = null, CancellationToken ct = default)
+        public static List<Tuple<NodeType, NodeType, TWeight>> Prim<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, NodeType start, IComparer<TWeight>? weightComparer = null, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
             where TWeight : IComparable<TWeight>
         {
-            // Prim ½öÊÊÓÃÓÚÎŞÏòÍ¼ / Prim is defined for undirected graphs
-            if (graph.IsDirected) throw new GraphX.Error.GraphMethodNotApplicableException("Prim", "Prim requires an undirected graph.", $"directed={graph.IsDirected}");
-             if (weightComparer == null) weightComparer = Comparer<TWeight>.Default;
-             var result = new List<Tuple<NodeType, NodeType, TWeight>>();
+            // Prim ä»…é€‚ç”¨äºæ— å‘å›¾ / Prim is defined for undirected graphs
+            if (graph.IsDirected) throw new Error.GraphMethodNotApplicableException("Prim", "Prim requires an undirected graph.", $"directed={graph.IsDirected}");
+            weightComparer ??= Comparer<TWeight>.Default;
+            var result = new List<Tuple<NodeType, NodeType, TWeight>>();
 
-             var visited = new HashSet<NodeType>();
-             var heap = new BinaryHeap<TWeight, Tuple<NodeType, NodeType>>(delegate (TWeight a, TWeight b) { return weightComparer.Compare(a, b); });
+            var visited = new HashSet<NodeType>();
+            var heap = new BinaryHeap<TWeight, Tuple<NodeType, NodeType>>(delegate (TWeight a, TWeight b) { return weightComparer.Compare(a, b); });
 
-             visited.Add(start);
-             // ´ÓÆğµãÑ¹ÈëËùÓĞÏàÁÚ±ß / push all edges from start
-             foreach (var nb in graph.GetNeighbors(start))
-             {
-                 ct.ThrowIfCancellationRequested();
-                 heap.Enqueue(Tuple.Create(start, nb.Key), nb.Value);
-             }
+            visited.Add(start);
+            // ä»èµ·ç‚¹å‹å…¥æ‰€æœ‰ç›¸é‚»è¾¹ / push all edges from start
+            foreach (var nb in graph.GetNeighbors(start))
+            {
+                ct.ThrowIfCancellationRequested();
+                heap.Enqueue(new(start, nb.Key), nb.Value);
+            }
 
-             while (heap.Count > 0)
-             {
-                 ct.ThrowIfCancellationRequested();
-                 var entry = heap.DequeueMin();
-                 var w = entry.priority;
-                 var uv = entry.item; // (u,v)
-                 var u = uv.Item1; var v = uv.Item2;
-                 if (visited.Contains(v)) continue;
-                 // Ñ¡Ôñ±ß u-v / select edge u-v
-                 result.Add(Tuple.Create(u, v, w));
-                 visited.Add(v);
-                 // ´Ó v À©Õ¹±ß / add edges from v
-                 foreach (var nb in graph.GetNeighbors(v))
-                 {
-                     ct.ThrowIfCancellationRequested();
-                     if (!visited.Contains(nb.Key)) heap.Enqueue(Tuple.Create(v, nb.Key), nb.Value);
-                 }
-             }
+            while (heap.Count > 0)
+            {
+                ct.ThrowIfCancellationRequested();
+                var (priority, item) = heap.DequeueMin();
+                var w = priority;
+                var uv = item; // (u,v)
+                var u = uv.Item1; var v = uv.Item2;
+                if (visited.Contains(v)) continue;
+                // é€‰æ‹©è¾¹ u-v / select edge u-v
+                result.Add(new(u, v, w));
+                visited.Add(v);
+                // ä» v æ‰©å±•è¾¹ / add edges from v
+                foreach (var nb in graph.GetNeighbors(v))
+                {
+                    ct.ThrowIfCancellationRequested();
+                    if (!visited.Contains(nb.Key)) heap.Enqueue(new(v, nb.Key), nb.Value);
+                }
+            }
 
-             return result;
+            return result;
         }
 
         /// <summary>
-        /// A* ËÑË÷Ëã·¨£¨Æô·¢Ê½£©£¬·µ»Ø×î¶ÌÂ·¾¶½á¹û¡£Æô·¢º¯Êı¹À¼Æ´ÓÈÎÒâ½Úµãµ½Ä¿±êµÄ´ú¼Û¡£<br/>A* search algorithm (heuristic), returns a shortest path result. The heuristic estimates cost from a node to the goal.
+        /// A* æœç´¢ç®—æ³•ï¼ˆå¯å‘å¼ï¼‰ï¼Œè¿”å›æœ€çŸ­è·¯å¾„ç»“æœã€‚å¯å‘å‡½æ•°ä¼°è®¡ä»ä»»æ„èŠ‚ç‚¹åˆ°ç›®æ ‡çš„ä»£ä»·ã€‚<br/>A* search algorithm (heuristic), returns a shortest path result. The heuristic estimates cost from a node to the goal.
         /// </summary>
         public static PathResult<NodeType, TWeight> AStar<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, NodeType start, NodeType goal, IWeightOperator<TWeight> op, Func<NodeType, NodeType, TWeight> heuristic, bool includeNodeWeight = false, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
             where TWeight : IComparable<TWeight>
         {
-            // ÏÈ¾öÌõ¼ş£ºA* ÒªÇó±ßÈ¨·Ç¸º / Precondition: A* requires non-negative edge weights
+            // å…ˆå†³æ¡ä»¶ï¼šA* è¦æ±‚è¾¹æƒéè´Ÿ / Precondition: A* requires non-negative edge weights
             bool _astarHasNegative = false;
-            foreach (var _e in graph.WeightedEdges)
+            foreach (var (U, V, W) in graph.WeightedEdges)
             {
-                if (op.Compare(_e.W, op.Zero) < 0) { _astarHasNegative = true; break; }
+                if (op.Compare(W, op.Zero) < 0) { _astarHasNegative = true; break; }
             }
             if (_astarHasNegative)
             {
-                throw new GraphX.Error.GraphMethodNotApplicableException("A*", "Graph contains negative edge weights; A* requires non-negative weights.", $"directed={graph.IsDirected}, negativeEdges=true");
+                throw new Error.GraphMethodNotApplicableException("A*", "Graph contains negative edge weights; A* requires non-negative weights.", $"directed={graph.IsDirected}, negativeEdges=true");
             }
 
             var result = new PathResult<NodeType, TWeight>();
-            var dist = new Dictionary<NodeType, TWeight>(); // g ´ú¼Û / g score
+            var dist = new Dictionary<NodeType, TWeight>(); // g ä»£ä»· / g score
             var prev = new Dictionary<NodeType, NodeType>();
 
             var heap = new BinaryHeap<TWeight, NodeType>(delegate (TWeight a, TWeight b) { return op.Compare(a, b); });
 
-            // ´Ó±ß¿ìÕÕ³õÊ¼»¯½Úµã¼¯ºÏ / initialize nodes from edges
+            // ä»è¾¹å¿«ç…§åˆå§‹åŒ–èŠ‚ç‚¹é›†åˆ / initialize nodes from edges
             var edges = graph.WeightedEdges.ToList();
             var nodes = new HashSet<NodeType>();
-            foreach (var e in edges) { nodes.Add(e.U); nodes.Add(e.V); }
+            foreach (var (U, V, W) in edges) { nodes.Add(U); nodes.Add(V); }
 
             foreach (var n in nodes) dist[n] = op.Infinity;
             if (!dist.ContainsKey(start)) dist[start] = op.Zero;
@@ -271,9 +268,9 @@ namespace GraphX.Algorithms
             while (heap.Count > 0)
             {
                 ct.ThrowIfCancellationRequested();
-                var cur = heap.DequeueMin();
-                var u = cur.item;
-                if (op.Compare(cur.priority, op.Add(dist[u], heuristic(u, goal))) > 0) continue; // ¹ıÆÚÌõÄ¿ / stale
+                var (priority, item) = heap.DequeueMin();
+                var u = item;
+                if (op.Compare(priority, op.Add(dist[u], heuristic(u, goal))) > 0) continue; // è¿‡æœŸæ¡ç›® / stale
                 if (u.Equals(goal)) break;
 
                 foreach (var nb in graph.GetNeighbors(u))
@@ -305,27 +302,27 @@ namespace GraphX.Algorithms
         }
 
         /// <summary>
-        /// ¼ÆËãÈõÁ¬Í¨·ÖÁ¿£¨½«±ßÊÓÎªÎŞÏò£©£¬·µ»ØÃ¿¸öÁ¬Í¨·ÖÁ¿µÄ½ÚµãÁĞ±í¡£Ö§³ÖÈ¡Ïû¡£<br/>Compute weakly connected components (treat edges as undirected) and return each component as a list of nodes. Supports cancellation.
+        /// è®¡ç®—å¼±è¿é€šåˆ†é‡ï¼ˆå°†è¾¹è§†ä¸ºæ— å‘ï¼‰ï¼Œè¿”å›æ¯ä¸ªè¿é€šåˆ†é‡çš„èŠ‚ç‚¹åˆ—è¡¨ã€‚æ”¯æŒå–æ¶ˆã€‚<br/>Compute weakly connected components (treat edges as undirected) and return each component as a list of nodes. Supports cancellation.
         /// </summary>
         public static List<List<NodeType>> ConnectedComponents<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
             where TWeight : IComparable<TWeight>
         {
-            // ½ÚµãºÍ±ßµÄ¿ìÕÕ / snapshot nodes and edges
+            // èŠ‚ç‚¹å’Œè¾¹çš„å¿«ç…§ / snapshot nodes and edges
             var nodes = new HashSet<NodeType>(graph.Nodes);
             var edges = graph.WeightedEdges.ToList();
 
-            // ¹¹½¨ÎŞÏòÁÚ½ÓµÄ¿ìÕÕ / build undirected adjacency snapshot
+            // æ„å»ºæ— å‘é‚»æ¥çš„å¿«ç…§ / build undirected adjacency snapshot
             var adj = new Dictionary<NodeType, List<NodeType>>();
             foreach (var n in nodes) adj[n] = new List<NodeType>();
-            foreach (var e in edges)
+            foreach (var (U, V, _) in edges)
             {
                 ct.ThrowIfCancellationRequested();
-                // Á½¸ö·½Ïò¶¼¼ÓÈë£¨¶ÔÓĞÏò/ÎŞÏò´æ´¢¾ùÊÊÓÃ£©/ add both directions (works for directed or undirected stored edges)
-                if (nodes.Contains(e.U) && nodes.Contains(e.V))
+                // ä¸¤ä¸ªæ–¹å‘éƒ½åŠ å…¥ï¼ˆå¯¹æœ‰å‘/æ— å‘å­˜å‚¨å‡é€‚ç”¨ï¼‰/ add both directions (works for directed or undirected stored edges)
+                if (nodes.Contains(U) && nodes.Contains(V))
                 {
-                    adj[e.U].Add(e.V);
-                    adj[e.V].Add(e.U);
+                    adj[U].Add(V);
+                    adj[V].Add(U);
                 }
             }
 
@@ -336,7 +333,7 @@ namespace GraphX.Algorithms
             {
                 ct.ThrowIfCancellationRequested();
                 if (visited.Contains(n)) continue;
-                // ´Ó n ½øĞĞ BFS/DFS / BFS/DFS from n
+                // ä» n è¿›è¡Œ BFS/DFS / BFS/DFS from n
                 var comp = new List<NodeType>();
                 var q = new Queue<NodeType>();
                 visited.Add(n);
@@ -358,32 +355,33 @@ namespace GraphX.Algorithms
         }
 
         /// <summary>
-        /// ·µ»ØÈõÁ¬Í¨·ÖÁ¿ÊıÁ¿¡£<br/>Return number of weakly connected components.
+        /// è¿”å›å¼±è¿é€šåˆ†é‡æ•°é‡ã€‚<br/>Return number of weakly connected components.
         /// </summary>
         public static int ConnectedComponentsCount<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
             where TWeight : IComparable<TWeight>
         {
-            return graph.ConnectedComponents<NodeType, TWeight>(ct).Count;
+            return graph.ConnectedComponents(ct).Count;
         }
 
         /// <summary>
-        /// ¼ÆËãÇ¿Á¬Í¨·ÖÁ¿£¨Tarjan Ëã·¨£©£¬Ö§³ÖÈ¡Ïû¡£<br/>Compute strongly connected components using Tarjan's algorithm. Supports cancellation.
+        /// è®¡ç®—å¼ºè¿é€šåˆ†é‡ï¼ˆTarjan ç®—æ³•ï¼‰ï¼Œæ”¯æŒå–æ¶ˆã€‚<br/>Compute strongly connected components using Tarjan's algorithm. Supports cancellation.
         /// </summary>
         public static List<List<NodeType>> StronglyConnectedComponents<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
             where TWeight : IComparable<TWeight>
         {
-            // È¡ÓĞÏò±ß¿ìÕÕ / snapshot nodes and edges (directed)
+            // å–æœ‰å‘è¾¹å¿«ç…§ / snapshot nodes and edges (directed)
             var nodes = graph.Nodes.ToList();
             var edges = graph.WeightedEdges.ToList();
 
             var adj = new Dictionary<NodeType, List<NodeType>>();
             foreach (var n in nodes) adj[n] = new List<NodeType>();
-            foreach (var e in edges)
+            //TWeight? W;
+            foreach (var (U, V, _) in edges)
             {
                 ct.ThrowIfCancellationRequested();
-                if (adj.ContainsKey(e.U) && adj.ContainsKey(e.V)) adj[e.U].Add(e.V);
+                if (adj.ContainsKey(U) && adj.ContainsKey(V)) adj[U].Add(V);
             }
 
             var index = 0;
@@ -416,7 +414,7 @@ namespace GraphX.Algorithms
                     }
                 }
 
-                // Èô v Îª¸ù£¬Ôòµ¯Õ»²¢ĞÎ³ÉÒ»¸öÇ¿Á¬Í¨·ÖÁ¿ / If v is a root node, pop the stack and generate an SCC
+                // è‹¥ v ä¸ºæ ¹ï¼Œåˆ™å¼¹æ ˆå¹¶å½¢æˆä¸€ä¸ªå¼ºè¿é€šåˆ†é‡ / If v is a root node, pop the stack and generate an SCC
                 if (lowlink[v] == indices[v])
                 {
                     var comp = new List<NodeType>();
@@ -441,19 +439,19 @@ namespace GraphX.Algorithms
         }
 
         /// <summary>
-        /// ¶¥µãÍØÆËÅÅĞò£¨Kahn Ëã·¨£©¡£ÈôÍ¼º¬ÓĞ»·ÔòÅ×³öÒì³£¡£Ö§³ÖÈ¡Ïû¡£<br/>Topological sort using Kahn's algorithm. Throws InvalidOperationException if the graph has a cycle. Supports cancellation.
+        /// é¡¶ç‚¹æ‹“æ‰‘æ’åºï¼ˆKahn ç®—æ³•ï¼‰ã€‚è‹¥å›¾å«æœ‰ç¯åˆ™æŠ›å‡ºå¼‚å¸¸ã€‚æ”¯æŒå–æ¶ˆã€‚<br/>Topological sort using Kahn's algorithm. Throws InvalidOperationException if the graph has a cycle. Supports cancellation.
         /// </summary>
         public static List<NodeType> TopologicalSort<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
             where TWeight : IComparable<TWeight>
         {
-            // ÏÈ¾öÌõ¼ş£ºĞèÒªÓĞÏòÎŞ»·Í¼ / Precondition: requires a directed acyclic graph
-            if (!graph.IsDirected) throw new GraphX.Error.GraphMethodNotApplicableException("TopologicalSort", "TopologicalSort requires a directed graph.", $"directed={graph.IsDirected}");
-            // ½ÚµãÓë±ßµÄ¿ìÕÕ / snapshot nodes and edges
+            // å…ˆå†³æ¡ä»¶ï¼šéœ€è¦æœ‰å‘æ— ç¯å›¾ / Precondition: requires a directed acyclic graph
+            if (!graph.IsDirected) throw new Error.GraphMethodNotApplicableException("TopologicalSort", "TopologicalSort requires a directed graph.", $"directed={graph.IsDirected}");
+            // èŠ‚ç‚¹ä¸è¾¹çš„å¿«ç…§ / snapshot nodes and edges
             var nodes = graph.Nodes.ToList();
             var edges = graph.WeightedEdges.ToList();
 
-            // ¹¹½¨ÁÚ½ÓÓëÈë¶È / build adjacency and in-degree
+            // æ„å»ºé‚»æ¥ä¸å…¥åº¦ / build adjacency and in-degree
             var adj = new Dictionary<NodeType, List<NodeType>>();
             var indeg = new Dictionary<NodeType, int>();
             foreach (var n in nodes)
@@ -461,12 +459,13 @@ namespace GraphX.Algorithms
                 adj[n] = new List<NodeType>();
                 indeg[n] = 0;
             }
-            foreach (var e in edges)
+
+            foreach (var (U, V, _) in edges)
             {
                 ct.ThrowIfCancellationRequested();
-                if (!adj.ContainsKey(e.U) || !adj.ContainsKey(e.V)) continue;
-                adj[e.U].Add(e.V);
-                indeg[e.V] = indeg.ContainsKey(e.V) ? indeg[e.V] + 1 : 1;
+                if (!adj.ContainsKey(U) || !adj.ContainsKey(V)) continue;
+                adj[U].Add(V);
+                indeg[V] = indeg.ContainsKey(V) ? indeg[V] + 1 : 1;
             }
 
             var q = new Queue<NodeType>();
@@ -495,10 +494,10 @@ namespace GraphX.Algorithms
             }
 
             return res;
-         }
+        }
 
         /// <summary>
-        /// ´ÓÆğµã½øĞĞ¹ã¶ÈÓÅÏÈ±éÀú£¬·µ»Ø°´ BFS Ë³Ğò·ÃÎÊµÄ½ÚµãÁĞ±í¡£Ö§³ÖÈ¡Ïû¡£<br/>Breadth-First Search from a start node. Returns visited nodes in BFS order. Supports cancellation.
+        /// ä»èµ·ç‚¹è¿›è¡Œå¹¿åº¦ä¼˜å…ˆéå†ï¼Œè¿”å›æŒ‰ BFS é¡ºåºè®¿é—®çš„èŠ‚ç‚¹åˆ—è¡¨ã€‚æ”¯æŒå–æ¶ˆã€‚<br/>Breadth-First Search from a start node. Returns visited nodes in BFS order. Supports cancellation.
         /// </summary>
         public static List<NodeType> BFS<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, NodeType start, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
@@ -531,7 +530,7 @@ namespace GraphX.Algorithms
         }
 
         /// <summary>
-        /// ´ÓÆğµã½øĞĞÉî¶ÈÓÅÏÈ±éÀú£¨µü´úÊµÏÖ£©£¬·µ»Ø°´Ç°Ğò·ÃÎÊµÄ½ÚµãÁĞ±í¡£Ö§³ÖÈ¡Ïû¡£<br/>Depth-First Search from a start node (iterative). Returns visited nodes in DFS pre-order. Supports cancellation.
+        /// ä»èµ·ç‚¹è¿›è¡Œæ·±åº¦ä¼˜å…ˆéå†ï¼ˆè¿­ä»£å®ç°ï¼‰ï¼Œè¿”å›æŒ‰å‰åºè®¿é—®çš„èŠ‚ç‚¹åˆ—è¡¨ã€‚æ”¯æŒå–æ¶ˆã€‚<br/>Depth-First Search from a start node (iterative). Returns visited nodes in DFS pre-order. Supports cancellation.
         /// </summary>
         public static List<NodeType> DFS<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, NodeType start, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
@@ -551,7 +550,7 @@ namespace GraphX.Algorithms
                 var u = stack.Pop();
                 if (!visited.Add(u)) continue;
                 result.Add(u);
-                // ·´ÏòÑ¹Õ»ÒÔ½üËÆµİ¹é DFS µÄ±éÀúË³Ğò£¨ÈôË³Ğò¿ÉÎÈ¶¨£©/ push neighbors in reverse order to approximate recursive DFS order if stable ordering available
+                // åå‘å‹æ ˆä»¥è¿‘ä¼¼é€’å½’ DFS çš„éå†é¡ºåºï¼ˆè‹¥é¡ºåºå¯ç¨³å®šï¼‰/ push neighbors in reverse order to approximate recursive DFS order if stable ordering available
                 var neighbors = graph.GetNeighbors(u).Select(kv => kv.Key).ToList();
                 for (int i = neighbors.Count - 1; i >= 0; i--)
                 {
@@ -565,7 +564,7 @@ namespace GraphX.Algorithms
         }
 
         /// <summary>
-        /// ÕÒ³öËùÓĞ¡°ÇÅ¡±±ß£¨É¾³ıºó»áÔö¼ÓÁ¬Í¨·ÖÁ¿ÊıµÄ±ß£©£¬½«Í¼ÊÓÎªÎŞÏò¡£Ö§³ÖÈ¡Ïû¡£<br/>Find all bridge edges in the graph (edges whose removal increases number of connected components), treating the graph as undirected. Supports cancellation.
+        /// æ‰¾å‡ºæ‰€æœ‰â€œæ¡¥â€è¾¹ï¼ˆåˆ é™¤åä¼šå¢åŠ è¿é€šåˆ†é‡æ•°çš„è¾¹ï¼‰ï¼Œå°†å›¾è§†ä¸ºæ— å‘ã€‚æ”¯æŒå–æ¶ˆã€‚<br/>Find all bridge edges in the graph (edges whose removal increases number of connected components), treating the graph as undirected. Supports cancellation.
         /// </summary>
         public static List<(NodeType U, NodeType V)> Bridges<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
@@ -580,7 +579,7 @@ namespace GraphX.Algorithms
                 foreach (var nb in graph.GetNeighbors(u))
                 {
                     if (!adj.ContainsKey(nb.Key)) continue;
-                    // Ìí¼ÓÎŞÏòÁÚ½Ó / add undirected adjacency
+                    // æ·»åŠ æ— å‘é‚»æ¥ / add undirected adjacency
                     adj[u].Add(nb.Key);
                 }
             }
@@ -592,7 +591,7 @@ namespace GraphX.Algorithms
             var time = 0;
             var bridges = new List<(NodeType U, NodeType V)>();
 
-            foreach (var v in nodes) { visited[v] = false; parent[v] = default(NodeType); }
+            foreach (var v in nodes) { visited[v] = false; parent[v] = default!; }
 
             void Dfs(NodeType u)
             {
@@ -608,12 +607,12 @@ namespace GraphX.Algorithms
                         parent[v] = u;
                         Dfs(v);
                         low[u] = Math.Min(low[u], low[v]);
-                        // Èô low[v] > disc[u] Ôò u-v ÎªÇÅ / if low[v] > disc[u] then edge u-v is a bridge
+                        // è‹¥ low[v] > disc[u] åˆ™ u-v ä¸ºæ¡¥ / if low[v] > disc[u] then edge u-v is a bridge
                         if (low[v] > disc[u]) bridges.Add((u, v));
                     }
                     else if (!EqualityComparer<NodeType>.Default.Equals(parent[u], v))
                     {
-                        // ·µ×æ±ß / back edge
+                        // è¿”ç¥–è¾¹ / back edge
                         low[u] = Math.Min(low[u], disc[v]);
                     }
                 }
@@ -628,7 +627,7 @@ namespace GraphX.Algorithms
         }
 
         /// <summary>
-        /// ÕÒ³öÍ¼ÖĞµÄËùÓĞ¸îµã£¨¹Ø½Úµã£©£¬½«Í¼ÊÓÎªÎŞÏò¡£Ö§³ÖÈ¡Ïû¡£<br/>Find articulation points (cut vertices) treating the graph as undirected. Supports cancellation.
+        /// æ‰¾å‡ºå›¾ä¸­çš„æ‰€æœ‰å‰²ç‚¹ï¼ˆå…³èŠ‚ç‚¹ï¼‰ï¼Œå°†å›¾è§†ä¸ºæ— å‘ã€‚æ”¯æŒå–æ¶ˆã€‚<br/>Find articulation points (cut vertices) treating the graph as undirected. Supports cancellation.
         /// </summary>
         public static List<NodeType> ArticulationPoints<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
@@ -657,7 +656,7 @@ namespace GraphX.Algorithms
             foreach (var v in nodes)
             {
                 visited[v] = false;
-                parent[v] = default(NodeType);
+                parent[v] = default!;
                 ap[v] = false;
             }
 
@@ -677,11 +676,11 @@ namespace GraphX.Algorithms
                         parent[v] = u;
                         Dfs(v);
                         low[u] = Math.Min(low[u], low[v]);
-                        // Èô u Îª¸ùÇÒ×ÓÊ÷Êı >= 2 / if u is root and has two or more children
-                        if (EqualityComparer<NodeType>.Default.Equals(parent[u], default(NodeType)) && children > 1)
+                        // è‹¥ u ä¸ºæ ¹ä¸”å­æ ‘æ•° >= 2 / if u is root and has two or more children
+                        if (EqualityComparer<NodeType>.Default.Equals(parent[u], default!) && children > 1)
                             ap[u] = true;
-                        // Èô u ·Ç¸ùÇÒÂú×ã low[v] >= disc[u] / if u is not root and low[v] >= disc[u]
-                        if (!EqualityComparer<NodeType>.Default.Equals(parent[u], default(NodeType)) && low[v] >= disc[u])
+                        // è‹¥ u éæ ¹ä¸”æ»¡è¶³ low[v] >= disc[u] / if u is not root and low[v] >= disc[u]
+                        if (!EqualityComparer<NodeType>.Default.Equals(parent[u], default!) && low[v] >= disc[u])
                             ap[u] = true;
                     }
                     else if (!EqualityComparer<NodeType>.Default.Equals(parent[u], v))
@@ -701,7 +700,7 @@ namespace GraphX.Algorithms
 
 
         /// <summary>
-        /// Floyd-Warshall È«Ô´×î¶ÌÂ·£¬·µ»Ø (dist, next) ×Öµä¡£<br/>Floyd-Warshall all-pairs shortest paths. Returns (dist, next) dictionaries.
+        /// Floyd-Warshall å…¨æºæœ€çŸ­è·¯ï¼Œè¿”å› (dist, next) å­—å…¸ã€‚<br/>Floyd-Warshall all-pairs shortest paths. Returns (dist, next) dictionaries.
         /// </summary>
         public static Tuple<Dictionary<NodeType, Dictionary<NodeType, TWeight>>, Dictionary<NodeType, Dictionary<NodeType, NodeType>>> FloydWarshall<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, IWeightOperator<TWeight> op, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
@@ -711,7 +710,7 @@ namespace GraphX.Algorithms
             var dist = new Dictionary<NodeType, Dictionary<NodeType, TWeight>>();
             var next = new Dictionary<NodeType, Dictionary<NodeType, NodeType>>();
 
-            // ³õÊ¼»¯ / init
+            // åˆå§‹åŒ– / init
             foreach (var u in nodes)
             {
                 dist[u] = new Dictionary<NodeType, TWeight>();
@@ -720,11 +719,11 @@ namespace GraphX.Algorithms
                 dist[u][u] = op.Zero;
             }
 
-            foreach (var e in graph.WeightedEdges)
+            foreach (var (U, V, W) in graph.WeightedEdges)
             {
                 ct.ThrowIfCancellationRequested();
-                dist[e.U][e.V] = e.W;
-                next[e.U][e.V] = e.V;
+                dist[U][V] = W;
+                next[U][V] = V;
             }
 
             foreach (var k in nodes)
@@ -748,11 +747,11 @@ namespace GraphX.Algorithms
                 }
             }
 
-            return Tuple.Create(dist, next);
+            return new(dist, next);
         }
 
         /// <summary>
-        /// »ùÓÚ Floyd-Warshall µÄ next ±íÖØ½¨Â·¾¶¡£<br/>Reconstruct path from Floyd-Warshall next table.
+        /// åŸºäº Floyd-Warshall çš„ next è¡¨é‡å»ºè·¯å¾„ã€‚<br/>Reconstruct path from Floyd-Warshall next table.
         /// </summary>
         public static List<NodeType> ReconstructPathFromFloydNext<NodeType, TWeight>(Dictionary<NodeType, Dictionary<NodeType, NodeType>> next, NodeType u, NodeType v)
             where NodeType : IEquatable<NodeType>
@@ -771,7 +770,7 @@ namespace GraphX.Algorithms
         }
 
         /// <summary>
-        /// SPFA£¨Shortest Path Faster Algorithm£©£¬Ê¹ÓÃ¶ÓÁĞ²¢ÔÚ³öÏÖ¸º»·Ê±Å×³öÒì³£¡£<br/>SPFA (Shortest Path Faster Algorithm) - uses queue and detects negative cycles.
+        /// SPFAï¼ˆShortest Path Faster Algorithmï¼‰ï¼Œä½¿ç”¨é˜Ÿåˆ—å¹¶åœ¨å‡ºç°è´Ÿç¯æ—¶æŠ›å‡ºå¼‚å¸¸ã€‚<br/>SPFA (Shortest Path Faster Algorithm) - uses queue and detects negative cycles.
         /// </summary>
         public static Tuple<Dictionary<NodeType, TWeight>, Dictionary<NodeType, NodeType>> SPFA<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, NodeType start, IWeightOperator<TWeight> op, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
@@ -808,22 +807,22 @@ namespace GraphX.Algorithms
                     if (op.Compare(nd, dist[v]) < 0)
                     {
                         dist[v] = nd; prev[v] = u;
-                        if (!inq[v]) { q.Enqueue(v); inq[v] = true; count[v]++; if (count[v] > nodes.Count) throw new GraphX.Error.BFANWCDetectedException(); }
+                        if (!inq[v]) { q.Enqueue(v); inq[v] = true; count[v]++; if (count[v] > nodes.Count) throw new Error.BFANWCDetectedException(); }
                     }
                 }
             }
 
-            return Tuple.Create(dist, prev);
+            return new(dist, prev);
         }
 
         /// <summary>
-        /// ×îĞ¡Éú³ÉÉ­ÁÖ£º¶ÔÃ¿¸öÁ¬Í¨·ÖÁ¿Éú³É¸÷×ÔµÄ MST£¨»ùÓÚ Kruskal ½á¹û£©¡£<br/>MinimumSpanningForest: produce MST per connected component using Kruskal results.
+        /// æœ€å°ç”Ÿæˆæ£®æ—ï¼šå¯¹æ¯ä¸ªè¿é€šåˆ†é‡ç”Ÿæˆå„è‡ªçš„ MSTï¼ˆåŸºäº Kruskal ç»“æœï¼‰ã€‚<br/>MinimumSpanningForest: produce MST per connected component using Kruskal results.
         /// </summary>
-        public static List<List<Tuple<NodeType, NodeType, TWeight>>> MinimumSpanningForest<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, IComparer<TWeight> weightComparer = null)
+        public static List<List<Tuple<NodeType, NodeType, TWeight>>> MinimumSpanningForest<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, IComparer<TWeight>? weightComparer = null)
             where NodeType : IEquatable<NodeType>
             where TWeight : IComparable<TWeight>
         {
-            var mstEdges = graph.Kruskal<NodeType, TWeight>(weightComparer);
+            var mstEdges = graph.Kruskal(weightComparer);
             var uf = new UnionFind<NodeType>();
             var nodes = new HashSet<NodeType>(graph.Nodes);
             foreach (var n in nodes) uf.MakeSet(n);
@@ -841,16 +840,16 @@ namespace GraphX.Algorithms
         }
 
         /// <summary>
-        /// Johnson Ëã·¨£ºÊÊÓÃÓÚ¿ÉÄÜ´æÔÚ¸ºÈ¨µ«ÎŞ¸º»·µÄÍ¼£¬¼ÆËãÈ«Ô´×î¶ÌÂ·£»·µ»Ø (dist, next)¡£<br/>Johnson's algorithm for all-pairs shortest paths for graphs with potentially negative weights but no negative cycles. Returns (dist, next).
+        /// Johnson ç®—æ³•ï¼šé€‚ç”¨äºå¯èƒ½å­˜åœ¨è´Ÿæƒä½†æ— è´Ÿç¯çš„å›¾ï¼Œè®¡ç®—å…¨æºæœ€çŸ­è·¯ï¼›è¿”å› (dist, next)ã€‚<br/>Johnson's algorithm for all-pairs shortest paths for graphs with potentially negative weights but no negative cycles. Returns (dist, next).
         /// </summary>
         public static Tuple<Dictionary<NodeType, Dictionary<NodeType, long>>, Dictionary<NodeType, Dictionary<NodeType, NodeType>>> Johnson<NodeType>(this IGraph<NodeType, long> graph, IWeightOperator<long> op, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
         {
-            // Ìí¼ÓĞéÄâÔ´²¢ÔËĞĞ Bellman-Ford ÒÔ»ñµÃÊÆÄÜ h / Add a super-source and run Bellman-Ford to get potentials h
+            // æ·»åŠ è™šæ‹Ÿæºå¹¶è¿è¡Œ Bellman-Ford ä»¥è·å¾—åŠ¿èƒ½ h / Add a super-source and run Bellman-Ford to get potentials h
             var nodes = graph.Nodes.ToList();
             var h = new Dictionary<NodeType, long>();
             foreach (var n in nodes) h[n] = op.Infinity;
-            // Í¨¹ıËÉ³ÚËùÓĞ±ß |V|-1 ´ÎÀ´Ä£Äâ´ÓĞéÄâÔ´³ö·¢ / relax all edges |V|-1 times from virtual source
+            // é€šè¿‡æ¾å¼›æ‰€æœ‰è¾¹ |V|-1 æ¬¡æ¥æ¨¡æ‹Ÿä»è™šæ‹Ÿæºå‡ºå‘ / relax all edges |V|-1 times from virtual source
             foreach (var n in nodes) h[n] = 0;
             var edges = graph.WeightedEdges.ToList();
             int ncount = nodes.Count;
@@ -858,32 +857,31 @@ namespace GraphX.Algorithms
             {
                 ct.ThrowIfCancellationRequested();
                 bool updated = false;
-                foreach (var e in edges)
+                foreach (var (U, V, W) in edges)
                 {
-                    var u = e.U; var v = e.V; var w = e.W;
-                    if (h[u] == op.Infinity) continue;
-                    var nd = h[u] + w;
-                    if (nd < h[v]) { h[v] = nd; updated = true; }
+                    if (h[U] == op.Infinity) continue;
+                    var nd = h[U] + W;
+                    if (nd < h[V]) { h[V] = nd; updated = true; }
                 }
                 if (!updated) break;
             }
-            // ¸º»·¼ì²é / check negative cycles
-            foreach (var e in edges)
+            // è´Ÿç¯æ£€æŸ¥ / check negative cycles
+            foreach (var (U, V, W) in edges)
             {
-                if (h[e.U] == op.Infinity) continue;
-                if (h[e.U] + e.W < h[e.V]) throw new GraphX.Error.BFANWCDetectedException();
+                if (h[U] == op.Infinity) continue;
+                if (h[U] + W < h[V]) throw new Error.BFANWCDetectedException();
             }
 
-            // ÖØÈ¨£ºw' = w + h[u] - h[v] / reweight edges: w' = w + h[u] - h[v]
+            // é‡æƒï¼šw' = w + h[u] - h[v] / reweight edges: w' = w + h[u] - h[v]
             var adj = new Dictionary<NodeType, List<KeyValuePair<NodeType, long>>>();
             foreach (var u in nodes) adj[u] = new List<KeyValuePair<NodeType, long>>();
-            foreach (var e in edges)
+            foreach (var (U, V, W) in edges)
             {
-                var wprime = e.W + h[e.U] - h[e.V];
-                adj[e.U].Add(new KeyValuePair<NodeType, long>(e.V, wprime));
+                var wprime = W + h[U] - h[V];
+                adj[U].Add(new KeyValuePair<NodeType, long>(V, wprime));
             }
 
-            // ¶ÔÃ¿¸öÔ´ÔËĞĞ Dijkstra£¨·Ç¸ºÈ¨£©/ For each source run Dijkstra on non-negative weights
+            // å¯¹æ¯ä¸ªæºè¿è¡Œ Dijkstraï¼ˆéè´Ÿæƒï¼‰/ For each source run Dijkstra on non-negative weights
             var allDist = new Dictionary<NodeType, Dictionary<NodeType, long>>();
             var next = new Dictionary<NodeType, Dictionary<NodeType, NodeType>>();
             foreach (var s in nodes)
@@ -896,17 +894,16 @@ namespace GraphX.Algorithms
                 pq.Enqueue(s, 0);
                 while (pq.Count > 0)
                 {
-                    var e = pq.DequeueMin();
-                    var u = e.item; var du = e.priority;
-                    if (du != dist[u]) continue;
-                    foreach (var kv in adj[u])
+                    var (priority, item) = pq.DequeueMin();
+                    if (priority != dist[item]) continue;
+                    foreach (var kv in adj[item])
                     {
                         var v = kv.Key; var w = kv.Value;
-                        var nd = du + w;
-                        if (nd < dist[v]) { dist[v] = nd; pq.Enqueue(v, nd); if (!next.ContainsKey(s)) next[s] = new Dictionary<NodeType, NodeType>(); next[s][v] = EqualityComparer<NodeType>.Default.Equals(u, s) ? v : (next[s].ContainsKey(u) ? next[s][u] : v); }
+                        var nd = priority + w;
+                        if (nd < dist[v]) { dist[v] = nd; pq.Enqueue(v, nd); if (!next.ContainsKey(s)) next[s] = new Dictionary<NodeType, NodeType>(); next[s][v] = EqualityComparer<NodeType>.Default.Equals(item, s) ? v : (next[s].ContainsKey(item) ? next[s][item] : v); }
                     }
                 }
-                // ×ª»ØÔ­È¨£ºd[u][v] = dist'[v] + h[v] - h[u] / convert back to original weights
+                // è½¬å›åŸæƒï¼šd[u][v] = dist'[v] + h[v] - h[u] / convert back to original weights
                 var realDist = new Dictionary<NodeType, long>();
                 foreach (var v in nodes)
                 {
@@ -915,39 +912,38 @@ namespace GraphX.Algorithms
                 allDist[s] = realDist;
             }
 
-            return Tuple.Create(allDist, next);
+            return new(allDist, next);
         }
 
         /// <summary>
-        /// Edmonds-Karp ×î´óÁ÷£¬ÊÊÓÃÓÚ long ÈİÁ¿£»·µ»Ø×î´óÁ÷Öµ¡£ÓÅ»¯ÎªÔÚ BFS Ê±½ö±éÀúÁÚ½Ó±í¡£<br/>Edmonds-Karp max flow for graphs with long capacities. Returns max flow value. Optimized to use adjacency lists for BFS.
+        /// Edmonds-Karp æœ€å¤§æµï¼Œé€‚ç”¨äº long å®¹é‡ï¼›è¿”å›æœ€å¤§æµå€¼ã€‚ä¼˜åŒ–ä¸ºåœ¨ BFS æ—¶ä»…éå†é‚»æ¥è¡¨ã€‚<br/>Edmonds-Karp max flow for graphs with long capacities. Returns max flow value. Optimized to use adjacency lists for BFS.
         /// </summary>
         public static long EdmondsKarpMaxFlow<NodeType>(this IGraph<NodeType, long> graph, NodeType source, NodeType sink, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
         {
-            // ÏÈ¾öÌõ¼ş£º×î´óÁ÷Ëã·¨ÒªÇóÓĞÏòÍ¼ / Precondition: Max flow algorithms expect a directed graph
-            if (!graph.IsDirected) throw new GraphX.Error.GraphMethodNotApplicableException("EdmondsKarpMaxFlow", "Edmonds-Karp max flow requires a directed graph.", $"directed={graph.IsDirected}");
-            // ¹¹½¨ÁÚ½Ó±íºÍ²ĞÁ¿ÈİÁ¿×Öµä / Build adjacency list and residual capacity dictionary
+            // å…ˆå†³æ¡ä»¶ï¼šæœ€å¤§æµç®—æ³•è¦æ±‚æœ‰å‘å›¾ / Precondition: Max flow algorithms expect a directed graph
+            if (!graph.IsDirected) throw new Error.GraphMethodNotApplicableException("EdmondsKarpMaxFlow", "Edmonds-Karp max flow requires a directed graph.", $"directed={graph.IsDirected}");
+            // æ„å»ºé‚»æ¥è¡¨å’Œæ®‹é‡å®¹é‡å­—å…¸ / Build adjacency list and residual capacity dictionary
             var adj = new Dictionary<NodeType, List<NodeType>>();
             var residual = new Dictionary<(NodeType U, NodeType V), long>();
 
-            // È·±£ËùÓĞ½Úµã¶¼ÔÚÁÚ½Ó±íÖĞ / ensure all nodes present in adj
+            // ç¡®ä¿æ‰€æœ‰èŠ‚ç‚¹éƒ½åœ¨é‚»æ¥è¡¨ä¸­ / ensure all nodes present in adj
             foreach (var n in graph.Nodes)
             {
                 if (!adj.ContainsKey(n)) adj[n] = new List<NodeType>();
             }
 
-            foreach (var e in graph.WeightedEdges)
+            foreach (var (U, V, W) in graph.WeightedEdges)
             {
-                var u = e.U; var v = e.V; var w = e.W;
-                if (!adj.ContainsKey(u)) adj[u] = new List<NodeType>();
-                if (!adj.ContainsKey(v)) adj[v] = new List<NodeType>();
-                if (!adj[u].Contains(v)) adj[u].Add(v);
-                if (!adj[v].Contains(u)) adj[v].Add(u); // Îª²ĞÁ¿±éÀú¼ÓÈë·´Ïò±ß / add reverse for residual traversal
+                if (!adj.ContainsKey(U)) adj[U] = new List<NodeType>();
+                if (!adj.ContainsKey(V)) adj[V] = new List<NodeType>();
+                if (!adj[U].Contains(V)) adj[U].Add(V);
+                if (!adj[V].Contains(U)) adj[V].Add(U); // ä¸ºæ®‹é‡éå†åŠ å…¥åå‘è¾¹ / add reverse for residual traversal
 
-                var key = (e.U, e.V);
-                if (residual.ContainsKey(key)) residual[key] = Math.Max(residual[key], w);
-                else residual[key] = w;
-                var rev = (e.V, e.U);
+                var key = (U, V);
+                if (residual.ContainsKey(key)) residual[key] = Math.Max(residual[key], W);
+                else residual[key] = W;
+                var rev = (V, U);
                 if (!residual.ContainsKey(rev)) residual[rev] = 0L;
             }
 
@@ -956,7 +952,7 @@ namespace GraphX.Algorithms
             {
                 ct.ThrowIfCancellationRequested();
 
-                // ÔÚ²ĞÁ¿ÍøÂçÖĞÓÃ BFS ÕÒÔö¹ãÂ· / BFS to find augmenting path in residual graph
+                // åœ¨æ®‹é‡ç½‘ç»œä¸­ç”¨ BFS æ‰¾å¢å¹¿è·¯ / BFS to find augmenting path in residual graph
                 var q = new Queue<NodeType>();
                 var parent = new Dictionary<NodeType, NodeType>();
                 var edgeFrom = new Dictionary<NodeType, (NodeType U, NodeType V)>();
@@ -987,14 +983,14 @@ namespace GraphX.Algorithms
 
                 if (!found) break;
 
-                // ¼ÆËãÆ¿¾± / find bottleneck
+                // è®¡ç®—ç“¶é¢ˆ / find bottleneck
                 var cur = sink; long bottleneck = long.MaxValue;
                 while (!EqualityComparer<NodeType>.Default.Equals(cur, source))
                 {
                     var ekey = edgeFrom[cur]; var cap = residual[ekey]; bottleneck = Math.Min(bottleneck, cap); cur = parent[cur];
                 }
 
-                // Ôö¹ã / augment
+                // å¢å¹¿ / augment
                 cur = sink;
                 while (!EqualityComparer<NodeType>.Default.Equals(cur, source))
                 {
@@ -1011,26 +1007,26 @@ namespace GraphX.Algorithms
         }
 
         /// <summary>
-        /// Dinic ×î´óÁ÷ÊµÏÖ£¨long ÈİÁ¿£©£¬·µ»Ø×î´óÁ÷Öµ¡£<br/>Dinic max flow implementation for long capacities. Returns max flow value.
+        /// Dinic æœ€å¤§æµå®ç°ï¼ˆlong å®¹é‡ï¼‰ï¼Œè¿”å›æœ€å¤§æµå€¼ã€‚<br/>Dinic max flow implementation for long capacities. Returns max flow value.
         /// </summary>
         public static long DinicMaxFlow<NodeType>(this IGraph<NodeType, long> graph, NodeType source, NodeType sink, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
         {
-            // ÏÈ¾öÌõ¼ş£ºDinic ĞèÒªÓĞÏòÍ¼ / Precondition: Dinic expects a directed graph
-            if (!graph.IsDirected) throw new GraphX.Error.GraphMethodNotApplicableException("DinicMaxFlow", "Dinic max flow requires a directed graph.", $"directed={graph.IsDirected}");
-            // ¹¹½¨ÁÚ½ÓºÍ²ĞÁ¿Í¼ / build adjacency residual graph
+            // å…ˆå†³æ¡ä»¶ï¼šDinic éœ€è¦æœ‰å‘å›¾ / Precondition: Dinic expects a directed graph
+            if (!graph.IsDirected) throw new Error.GraphMethodNotApplicableException("DinicMaxFlow", "Dinic max flow requires a directed graph.", $"directed={graph.IsDirected}");
+            // æ„å»ºé‚»æ¥å’Œæ®‹é‡å›¾ / build adjacency residual graph
             var adj = new Dictionary<NodeType, List<NodeType>>();
             var cap = new Dictionary<(NodeType, NodeType), long>();
             foreach (var n in graph.Nodes) adj[n] = new List<NodeType>();
-            foreach (var e in graph.WeightedEdges)
+            foreach (var (U, V, W) in graph.WeightedEdges)
             {
-                var key = (e.U, e.V);
-                if (!adj.ContainsKey(e.U)) adj[e.U] = new List<NodeType>();
-                if (!adj.ContainsKey(e.V)) adj[e.V] = new List<NodeType>();
-                if (!adj[e.U].Contains(e.V)) adj[e.U].Add(e.V);
-                if (!adj[e.V].Contains(e.U)) adj[e.V].Add(e.U);
-                cap[key] = (cap.ContainsKey(key) ? cap[key] : 0L) + e.W;
-                var rev = (e.V, e.U);
+                var key = (U, V);
+                if (!adj.ContainsKey(U)) adj[U] = new List<NodeType>();
+                if (!adj.ContainsKey(V)) adj[V] = new List<NodeType>();
+                if (!adj[U].Contains(V)) adj[U].Add(V);
+                if (!adj[V].Contains(U)) adj[V].Add(U);
+                cap[key] = (cap.ContainsKey(key) ? cap[key] : 0L) + W;
+                var rev = (V, U);
                 if (!cap.ContainsKey(rev)) cap[rev] = 0L;
             }
 
@@ -1038,7 +1034,7 @@ namespace GraphX.Algorithms
             while (true)
             {
                 ct.ThrowIfCancellationRequested();
-                // BFS ·Ö²ãÍ¼ / BFS level graph
+                // BFS åˆ†å±‚å›¾ / BFS level graph
                 var level = new Dictionary<NodeType, int>();
                 var q = new Queue<NodeType>();
                 q.Enqueue(source); level[source] = 0;
@@ -1090,54 +1086,54 @@ namespace GraphX.Algorithms
                 }
             }
 
-            // ·µ»Ø×ÜÁ÷Á¿ / return total flow
+            // è¿”å›æ€»æµé‡ / return total flow
             return flow;
         }
 
         /// <summary>
-        /// Stoer-Wagner È«¾Ö×îĞ¡¸î£¬·µ»Ø (minCutWeight, oneSideNodes)¡£Í¨¹ıÌá¹©µÄ `IWeightOperator` ÊµÏÖÍ¨ÓÃÈ¨ÖØÔËËãÓë±È½Ï¡£<br/>Stoer-Wagner global minimum cut. Returns tuple (minCutWeight, oneSideNodes). Implements generic TWeight using provided IWeightOperator for arithmetic and comparison.
+        /// Stoer-Wagner å…¨å±€æœ€å°å‰²ï¼Œè¿”å› (minCutWeight, oneSideNodes)ã€‚é€šè¿‡æä¾›çš„ `IWeightOperator` å®ç°é€šç”¨æƒé‡è¿ç®—ä¸æ¯”è¾ƒã€‚<br/>Stoer-Wagner global minimum cut. Returns tuple (minCutWeight, oneSideNodes). Implements generic TWeight using provided IWeightOperator for arithmetic and comparison.
         /// </summary>
         public static Tuple<TWeight, List<NodeType>> StoerWagnerMinCut<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, IWeightOperator<TWeight> op, bool preferSmallerSide = true, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
             where TWeight : struct, IComparable<TWeight>
         {
-            var partition = StoerWagnerMinCutPartition<NodeType, TWeight>(graph, op, preferSmallerSide, ct);
-            return Tuple.Create(partition.Item1, partition.Item2);
+            var partition = StoerWagnerMinCutPartition(graph, op, preferSmallerSide, ct);
+            return new(partition.Item1, partition.Item2);
         }
 
         /// <summary>
-        /// Stoer-Wagner µÄ·Ö¸î¸¨Öú£º·µ»Ø (cutWeight, sideA, sideB)¡£<br/>Stoer-Wagner partition helper returning (cutWeight, sideA, sideB).
+        /// Stoer-Wagner çš„åˆ†å‰²è¾…åŠ©ï¼šè¿”å› (cutWeight, sideA, sideB)ã€‚<br/>Stoer-Wagner partition helper returning (cutWeight, sideA, sideB).
         /// </summary>
         public static Tuple<TWeight, List<NodeType>, List<NodeType>> StoerWagnerMinCutPartition<NodeType, TWeight>(this IGraph<NodeType, TWeight> graph, IWeightOperator<TWeight> op, bool preferSmallerSide = true, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
             where TWeight : struct, IComparable<TWeight>
         {
-            // ¹¹½¨ÁÚ½ÓÈ¨ÖØ¾ØÕó / Build adjacency weight map
+            // æ„å»ºé‚»æ¥æƒé‡çŸ©é˜µ / Build adjacency weight map
             var nodes = graph.Nodes.ToList();
             int n = nodes.Count;
-            if (n == 0) return Tuple.Create(op.Zero, new List<NodeType>(), new List<NodeType>());
-            if (n == 1) return Tuple.Create(op.Zero, new List<NodeType> { nodes[0] }, new List<NodeType>());
+            if (n == 0) return new(op.Zero, new List<NodeType>(), new List<NodeType>());
+            if (n == 1) return new(op.Zero, new List<NodeType> { nodes[0] }, new List<NodeType>());
 
-            // ½Úµãµ½Ë÷ÒıÓ³Éä / map node to index
+            // èŠ‚ç‚¹åˆ°ç´¢å¼•æ˜ å°„ / map node to index
             var idx = new Dictionary<NodeType, int>();
             for (int i = 0; i < nodes.Count; i++) idx[nodes[i]] = i;
 
-            // ÁÚ½Ó¾ØÕó£¨TWeight£©/ adjacency matrix using TWeight
+            // é‚»æ¥çŸ©é˜µï¼ˆTWeightï¼‰/ adjacency matrix using TWeight
             var adj = new TWeight[n, n];
             for (int i = 0; i < n; i++) for (int j = 0; j < n; j++) adj[i, j] = op.Zero;
 
-            foreach (var e in graph.WeightedEdges)
+            foreach (var (U, V, W) in graph.WeightedEdges)
             {
-                if (!idx.ContainsKey(e.U) || !idx.ContainsKey(e.V)) continue;
-                var iu = idx[e.U];
-                var iv = idx[e.V];
-                adj[iu, iv] = op.Add(adj[iu, iv], e.W);
-                adj[iv, iu] = op.Add(adj[iv, iu], e.W);
+                if (!idx.ContainsKey(U) || !idx.ContainsKey(V)) continue;
+                var iu = idx[U];
+                var iv = idx[V];
+                adj[iu, iv] = op.Add(adj[iu, iv], W);
+                adj[iv, iu] = op.Add(adj[iv, iu], W);
             }
 
             var vertices = Enumerable.Range(0, n).ToList();
             TWeight bestWeight = op.Infinity;
-            List<int> bestCut = null;
+            List<int> bestCut = null!;
 
             while (vertices.Count > 1)
             {
@@ -1153,7 +1149,7 @@ namespace GraphX.Algorithms
 
                 for (int iter = 0; iter < vertices.Count; iter++)
                 {
-                    // Ñ¡Ôñµ±Ç°È¨ÖØ×î´óµÄÎ´¼ÓÈë¶¥µã / select next vertex with max weight among remaining
+                    // é€‰æ‹©å½“å‰æƒé‡æœ€å¤§çš„æœªåŠ å…¥é¡¶ç‚¹ / select next vertex with max weight among remaining
                     int sel = -1;
                     for (int i = 0; i < vertices.Count; i++)
                     {
@@ -1167,7 +1163,7 @@ namespace GraphX.Algorithms
                     prev = last;
                     last = sel;
 
-                    // ¸üĞÂÈ¨ÖØ / update weights
+                    // æ›´æ–°æƒé‡ / update weights
                     foreach (var v in vertices)
                     {
                         if (added[v]) continue;
@@ -1175,7 +1171,7 @@ namespace GraphX.Algorithms
                     }
                 }
 
-                // last Îª t£¬prev Îª s£»´Ë½×¶Î¸îÖØÎª weights[last] / last is t, prev is s; cut weight is weights[last]
+                // last ä¸º tï¼Œprev ä¸º sï¼›æ­¤é˜¶æ®µå‰²é‡ä¸º weights[last] / last is t, prev is s; cut weight is weights[last]
                 var cutWeight = weights[last];
                 if (op.Compare(cutWeight, bestWeight) < 0)
                 {
@@ -1185,7 +1181,7 @@ namespace GraphX.Algorithms
                 }
                 else if (bestCut != null && op.Compare(cutWeight, bestWeight) == 0)
                 {
-                    // Æ½ÊÖÊ±¸ù¾İ²ÎÊıÑ¡Ôñ½ÏĞ¡»ò½Ï´óÒ»²à / tie-breaker
+                    // å¹³æ‰‹æ—¶æ ¹æ®å‚æ•°é€‰æ‹©è¾ƒå°æˆ–è¾ƒå¤§ä¸€ä¾§ / tie-breaker
                     var sideA = order.Take(order.Count - 1).ToList();
                     int sideASize = sideA.Count;
                     int currentBestSize = bestCut.Count;
@@ -1199,8 +1195,8 @@ namespace GraphX.Algorithms
                     }
                 }
 
-                // ºÏ²¢¶¥µã£º½« last ºÏ²¢µ½ prev / merge last into prev
-                if (prev == -1) break; // ÎŞĞèºÏ²¢ / nothing to merge
+                // åˆå¹¶é¡¶ç‚¹ï¼šå°† last åˆå¹¶åˆ° prev / merge last into prev
+                if (prev == -1) break; // æ— éœ€åˆå¹¶ / nothing to merge
                 foreach (var v in vertices)
                 {
                     if (v == prev || v == last) continue;
@@ -1208,19 +1204,19 @@ namespace GraphX.Algorithms
                     adj[v, prev] = op.Add(adj[v, prev], adj[v, last]);
                 }
 
-                // ´Ó¼¯ºÏÖĞÒÆ³ı last / remove last from vertices
+                // ä»é›†åˆä¸­ç§»é™¤ last / remove last from vertices
                 vertices.Remove(last);
             }
 
-            // ½«Ë÷Òı¼¯×ª»»Îª½Úµã¼¯ / convert bestCut indices to nodes
+            // å°†ç´¢å¼•é›†è½¬æ¢ä¸ºèŠ‚ç‚¹é›† / convert bestCut indices to nodes
             List<NodeType> sideANodes = new();
             List<NodeType> sideBNodes = new();
             if (bestCut == null)
             {
-                // Æ½·²»®·Ö / trivial partition
+                // å¹³å‡¡åˆ’åˆ† / trivial partition
                 sideANodes.Add(nodes[0]);
                 sideBNodes = nodes.Skip(1).ToList();
-                return Tuple.Create(bestWeight, sideANodes, sideBNodes);
+                return new(bestWeight, sideANodes, sideBNodes);
             }
 
             var inSideA = new HashSet<int>(bestCut);
@@ -1229,33 +1225,33 @@ namespace GraphX.Algorithms
                 if (inSideA.Contains(i)) sideANodes.Add(nodes[i]); else sideBNodes.Add(nodes[i]);
             }
 
-            // ¸ù¾İÆ«ºÃÈ·±£Ò»²à´óĞ¡ / prefer smaller or larger side per flag
+            // æ ¹æ®åå¥½ç¡®ä¿ä¸€ä¾§å¤§å° / prefer smaller or larger side per flag
             bool wantSmaller = preferSmallerSide;
             if (wantSmaller)
             {
                 if (sideANodes.Count > sideBNodes.Count)
                 {
-                    var tmp = sideANodes; sideANodes = sideBNodes; sideBNodes = tmp;
+                    (sideBNodes, sideANodes) = (sideANodes, sideBNodes);
                 }
             }
             else
             {
                 if (sideANodes.Count < sideBNodes.Count)
                 {
-                    var tmp = sideANodes; sideANodes = sideBNodes; sideBNodes = tmp;
+                    (sideBNodes, sideANodes) = (sideANodes, sideBNodes);
                 }
             }
 
-            return Tuple.Create(bestWeight, sideANodes, sideBNodes);
+            return new(bestWeight, sideANodes, sideBNodes);
         }
 
         /// <summary>
-        /// Dinic ×îĞ¡¸î·Ö¸î£ºÔËĞĞ Dinic ºó·µ»Ø (maxflow, S, V\S)£¬ÆäÖĞ S Îª²ĞÁ¿Í¼ÖĞ´ÓÔ´ÈÔ¿É´ïµÄ½Úµã¼¯ºÏ¡£½öÖ§³Ö long ÈİÁ¿¡£<br/>Dinic min-cut partition: run Dinic and return (maxflow, S, V\S) where S is set of nodes reachable from source in residual graph. Only supports long capacities.
+        /// Dinic æœ€å°å‰²åˆ†å‰²ï¼šè¿è¡Œ Dinic åè¿”å› (maxflow, S, V\S)ï¼Œå…¶ä¸­ S ä¸ºæ®‹é‡å›¾ä¸­ä»æºä»å¯è¾¾çš„èŠ‚ç‚¹é›†åˆã€‚ä»…æ”¯æŒ long å®¹é‡ã€‚<br/>Dinic min-cut partition: run Dinic and return (maxflow, S, V\S) where S is set of nodes reachable from source in residual graph. Only supports long capacities.
         /// </summary>
         public static Tuple<long, List<NodeType>, List<NodeType>> DinicMinCutPartition<NodeType>(this IGraph<NodeType, long> graph, NodeType source, NodeType sink, CancellationToken ct = default)
             where NodeType : IEquatable<NodeType>
         {
-            // ¹¹½¨ÁÚ½Ó²ĞÁ¿Í¼ / Build adjacency residual graph
+            // æ„å»ºé‚»æ¥æ®‹é‡å›¾ / Build adjacency residual graph
             var adj = new Dictionary<NodeType, List<NodeType>>();
             var cap = new Dictionary<(NodeType, NodeType), long>();
             foreach (var n in graph.Nodes) adj[n] = new List<NodeType>();
@@ -1275,7 +1271,7 @@ namespace GraphX.Algorithms
             while (true)
             {
                 ct.ThrowIfCancellationRequested();
-                // BFS ·Ö²ãÍ¼ / BFS level graph
+                // BFS åˆ†å±‚å›¾ / BFS level graph
                 var level = new Dictionary<NodeType, int>();
                 var q = new Queue<NodeType>();
                 q.Enqueue(source); level[source] = 0;
@@ -1330,7 +1326,7 @@ namespace GraphX.Algorithms
                 }
             }
 
-            // ¼ÆËã²ĞÁ¿Í¼ÖĞ´ÓÔ´¿É´ïµÄ¼¯ºÏ S / compute reachable set S
+            // è®¡ç®—æ®‹é‡å›¾ä¸­ä»æºå¯è¾¾çš„é›†åˆ S / compute reachable set S
             var visited = new HashSet<NodeType>();
             var q2 = new Queue<NodeType>();
             visited.Add(source); q2.Enqueue(source);
@@ -1348,7 +1344,7 @@ namespace GraphX.Algorithms
             var S = visited.ToList();
             var V = graph.Nodes.ToList();
             var complement = V.Where(x => !visited.Contains(x)).ToList();
-            return Tuple.Create(flow, S, complement);
+            return new(flow, S, complement);
         }
 
 

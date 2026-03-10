@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -91,10 +91,10 @@ namespace GraphX.Tests
             var tc = PickOne(g => g.ExpectedMstTotalWeight.HasValue);
             var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
-            var mst = ig.Kruskal<string, long>();
+            var mst = ig.Kruskal();
             long total = mst.Sum(e => e.Item3);
             Assert.Equal(tc.ExpectedMstTotalWeight.Value, total);
-            var prim = ig.Prim<string, long>(ig.Nodes.First());
+            var prim = ig.Prim(ig.Nodes.First());
             Assert.Equal(total, prim.Sum(e => e.Item3));
         }
 
@@ -119,7 +119,7 @@ namespace GraphX.Tests
                     foreach (var e in ig.WeightedEdges) { dg.AddEdge(e.U, e.V, e.W, true); dg.AddEdge(e.V, e.U, e.W, true); }
                     floydGraph = dg;
                 }
-                var floyd = floydGraph.FloydWarshall<string, long>(Op);
+                var floyd = floydGraph.FloydWarshall(Op);
                 var fdist = floyd.Item1;
 
                 // convert to string-keyed view to avoid key identity issues
@@ -139,7 +139,7 @@ namespace GraphX.Tests
                     if (fv == null || fv == Op.Infinity)
                     {
                         // fallback to Bellman-Ford from s
-                        var bf = ig.BellmanFord<string, long>(s, Op);
+                        var bf = ig.BellmanFord(s, Op);
                         if (!bf.Item1.ContainsKey(t)) throw new Exception($"[{tc.Name}] No distance for {s}->{t} from Floyd and Bellman-Ford");
                         var bfv = bf.Item1[t];
                         if (bfv != want) throw new Exception($"[{tc.Name}] expected {s}->{t} == {want} but got {bfv} (Floyd gave {(fv==null?"missing":"Infinity")})");
@@ -172,7 +172,7 @@ namespace GraphX.Tests
                     foreach (var e in ig.WeightedEdges) { dg.AddEdge(e.U, e.V, e.W, true); dg.AddEdge(e.V, e.U, e.W, true); }
                     johnGraph = dg;
                 }
-                var john = johnGraph.Johnson<string>(Op);
+                var john = johnGraph.Johnson(Op);
                 var jdist = john.Item1;
 
                 // convert to string-keyed view
@@ -192,7 +192,7 @@ namespace GraphX.Tests
                     if (jv == null || jv == Op.Infinity)
                     {
                         // fallback to Bellman-Ford
-                        var bf = ig.BellmanFord<string, long>(s, Op);
+                        var bf = ig.BellmanFord(s, Op);
                         if (!bf.Item1.ContainsKey(t)) throw new Exception($"[{tc.Name}] No distance for {s}->{t} from Johnson and Bellman-Ford");
                         var bfv = bf.Item1[t];
                         if (bfv != want) throw new Exception($"[{tc.Name}] expected {s}->{t} == {want} but got {bfv} (Johnson gave {(jv==null?"missing":"Infinity")})");
@@ -222,7 +222,7 @@ namespace GraphX.Tests
                 Assert.True(nodes.Contains(s), $"Dijkstra source '{s}' missing in graph");
                 Assert.True(nodes.Contains(t), $"Dijkstra target '{t}' missing in graph");
                 if (want < 0) continue; // Dijkstra doesn't support negative weights
-                var dj = ig.Dijkstra<string, long>(s, t, Op, includeNodeWeight: false);
+                var dj = ig.Dijkstra(s, t, Op, includeNodeWeight: false);
                 Assert.True(dj.Reachable, $"Dijkstra reports unreachable {s}->{t}");
                 Assert.Equal(want, dj.Cost);
             }
@@ -241,7 +241,7 @@ namespace GraphX.Tests
             {
                 var s = group.Key;
                 Assert.True(nodes.Contains(s), $"Bellman-Ford source '{s}' missing in graph");
-                var bf = ig.BellmanFord<string, long>(s, Op);
+                var bf = ig.BellmanFord(s, Op);
                 var dist = bf.Item1;
                 foreach (var d in group)
                 {
@@ -264,7 +264,7 @@ namespace GraphX.Tests
             {
                 var s = group.Key;
                 Assert.True(nodes.Contains(s), $"SPFA source '{s}' missing in graph");
-                var spfa = ig.SPFA<string, long>(s, Op);
+                var spfa = ig.SPFA(s, Op);
                 var dist = spfa.Item1;
                 foreach (var d in group)
                 {
@@ -280,7 +280,7 @@ namespace GraphX.Tests
             var tc = PickOne(g => g.Name == "DAG_Topological");
             var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
-            var order = ig.TopologicalSort<string, long>();
+            var order = ig.TopologicalSort();
             var index = new Dictionary<string, int>();
             for (int i = 0; i < order.Count; i++) index[order[i]] = i;
             foreach (var e in ig.WeightedEdges)
@@ -295,8 +295,8 @@ namespace GraphX.Tests
             var tc = PickOne(g => g.ExpectedMaxFlow.HasValue);
             var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
-            var ek = ig.EdmondsKarpMaxFlow<string>("s", "t");
-            var din = ig.DinicMaxFlow<string>("s", "t");
+            var ek = ig.EdmondsKarpMaxFlow("s", "t");
+            var din = ig.DinicMaxFlow("s", "t");
             Assert.Equal(tc.ExpectedMaxFlow.Value, ek);
             Assert.Equal(tc.ExpectedMaxFlow.Value, din);
         }
@@ -307,7 +307,7 @@ namespace GraphX.Tests
             var tc = PickOne(g => g.Name == "Directed_SCC");
             var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
-            var sccs = ig.StronglyConnectedComponents<string, long>();
+            var sccs = ig.StronglyConnectedComponents();
             var sizes = sccs.Select(c => c.Count).OrderBy(x => x).ToList();
             Assert.Equal(new List<int> { 2, 3 }, sizes);
         }
@@ -318,9 +318,9 @@ namespace GraphX.Tests
             var tc = PickOne(g => g.Name == "Undirected_Bridges");
             var baseG = Parser.Parse(tc.Text, Op, out _);
             IGraph<string, long> ig = baseG;
-            var bridges = ig.Bridges<string, long>();
+            var bridges = ig.Bridges();
             Assert.Contains(bridges, b => (b.U == "3" && b.V == "5") || (b.U == "5" && b.V == "3"));
-            var aps = ig.ArticulationPoints<string, long>();
+            var aps = ig.ArticulationPoints();
             Assert.Contains("3", aps);
         }
     }
